@@ -1,0 +1,2 @@
+[2026-04-20 00:30:34] [INFO] Démarrage fraud_detector.sh — mode: subshell — fichier: data/transactions_light.csv (1 lignes)
+[2026-04-20 00:30:34] [INFO] Terminé — 1 transactions — 127 alertes

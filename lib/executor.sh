@@ -7,6 +7,24 @@ declare -A SCENARIO_FILES=(
     [lourd]="$DATA_DIR/transactions_heavy.csv"
 )
 
+# Lance les 5 algorithmes en parallèle via des sous-shells bash ( ) &
+# $1 : contenu CSV  $2 : chemin du fichier CSV
+run_subshell() {
+    : # TODO: implémenter
+}
+
+# Lance les 5 algorithmes via fork_runner.c (appels système fork/wait)
+# $1 : contenu CSV  $2 : chemin du fichier CSV
+run_fork() {
+    : # TODO: implémenter
+}
+
+# Lance les 5 algorithmes via thread_runner.c (pthreads POSIX)
+# $1 : contenu CSV  $2 : chemin du fichier CSV
+run_threads() {
+    : # TODO: implémenter
+}
+
 # Sélectionne le fichier selon le mode
 resolve_input() {
     local mode="$1"

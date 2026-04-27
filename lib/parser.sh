@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Valide l'existence, la lisibilité et l'en-tête du fichier CSV
+# $1 : chemin du fichier CSV
+validate_csv() {
+    : # TODO: implémenter
+}
+
 # Valide l'en-tête du fichier CSV
 validate_header() {
     local file="$1"
@@ -13,4 +19,16 @@ validate_header() {
 parse_line() {
     local line="$1"
     IFS=',' read -r TRANSACTION_ID AMOUNT TIMESTAMP MERCHANT CARD_NUMBER <<< "$line"
+}
+
+# Filtre les lignes du CSV selon un utilisateur donné
+# $1 : chemin du fichier CSV  $2 : nom d'utilisateur (vide = tout retourner)
+filter_by_user() {
+    : # TODO: implémenter
+}
+
+# Affiche les statistiques du CSV (min, max, moyenne des montants)
+# $1 : contenu CSV (texte)
+show_stats() {
+    : # TODO: implémenter
 }
