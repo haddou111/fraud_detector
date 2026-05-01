@@ -1,0 +1,4 @@
+transaction_id,amount,timestamp,merchant,card_number
+TXN001,250.00,2026-04-19T08:00:00,SuperMarket,****1234
+TXN002,15000.00,2026-04-19T08:05:00,OnlineShop,****5678
+TXN003,89.99,2026-04-19T08:10:00,GasStation,****9012
