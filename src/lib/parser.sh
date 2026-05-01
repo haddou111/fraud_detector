@@ -109,22 +109,53 @@ parse_line() {
   return 1
 fi
 }
- 
-parse_csv() {
-  local file_CSV="$1"
-  local line
+# Filtre les lignes du CSV selon un utilisateur donné
+# $1 : chemin du fichier CSV
+# $2 : nom d'utilisateur (vide = tout retourner)
+filter_by_user() {
+    local file="$1"
+    local user_filter="$2"
 
-  validate_csv "$file_CSV" || return 1
-  validate_header "$file_CSV" || return 1
+  # Si aucun utilisateur n'est donné, on affiche tout le fichier
+    if [[ -z "$user_filter" ]]; then
+        cat "$file"
+        return 0
+    fi
 
-  tail -n +2 "$file_CSV" | while IFS= read -r line; do
-    parse_line "$line" || log_error "Ligne invalide: $line"
-  done
+    # Afficher l'en-tête
+    head -n 1 "$file"
 
-  return 0
-}
+    # Filtrer selon la colonne USER, ici colonne 2
+    -v user="$user_filter" 'NR > 1 && $2 == user' "$file"
 
-parse_csv "$1"
+    return 0
+} 
+
+
+
+
+
+
+
+
+
+
+
+#parse_csv() {
+ # local file_CSV="$1"
+  #local lineawk -F'|' 
+
+  #validate_csv "$file_CSV" || return 1
+  #validate_header "$file_CSV" || return 1
+
+  #tail -n +2 "$file_CSV" | while IFS= read -r line; do
+   # parse_line "$line" || log_error "Ligne invalide: $line"
+  #done
+
+  #return 0
+#}
+
+#parse_csv "$1"
 
 
 
