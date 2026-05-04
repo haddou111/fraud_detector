@@ -38,11 +38,14 @@ init_logger() {
         touch "$LOG_FILE" 2>/dev/null || {
     echo -e "${RED}[ERROR] Impossible de créer le fichier log${RESET}"
     exit 106
-}
+    }
         
     fi
     # Permissions sécurisées du fichier log
-    chmod u=rw,go=r "$LOG_FILE" 2>>"$LOG_FILE"
+    chmod u=rw,go=r "$LOG_FILE" 2>/dev/null || {
+    log_error "Impossible de modifier permissions"
+    exit 106
+    }
     # Gestion interruption CTRL+C
     trap 'log_error "Interruption du programme (SIGINT)"; exit 130' INT
 }
@@ -59,13 +62,13 @@ restore_logs() {
         #crée une variable archive avec un nom unique basé sur la date et l'heure actuelle
         local archive="$LOG_DIR/archive_$(date +%Y%m%d_%H%M%S).tar.gz"
         #archive le fichier de log actuel dans un fichier tar.gz et redirige les erreurs vers le fichier de log
-        tar -czf "$archive" "$LOG_FILE" 2>>"$LOG_FILE" || {
-            echo "Erreur: échec de l'archivage"
-            exit 106
-        }
+        tar -czf "$archive" "$LOG_FILE" 2>/dev/null || {
+             log_error "Echec archivage logs"
+             exit 106
+      }
         #Réinitialisation du log
         :> "$LOG_FILE" 2>>"$LOG_FILE" || {
-            echo -e "${RED}[ERROR] Échec de la réinitialisation du log${RESET}"
+            log_error "Échec de la réinitialisation du log"
             exit 106
         }
 
@@ -94,10 +97,10 @@ _log() {
 
         # Choix couleur selon niveau
         case "$level" in
-            INFO)
+            INFOS)
                 echo -e "${BLUE}${log_msg}${RESET}" | tee -a "$LOG_FILE"
                 ;;
-            WARN)
+            WARNING)
                 echo -e "${PURPLE}${log_msg}${RESET}" | tee -a "$LOG_FILE"
                 ;;
             ERROR)
