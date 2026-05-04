@@ -15,12 +15,17 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"    
 
 # ── Chargement des bibliothèques ─────────────────────────────
-source "${SCRIPT_DIR}/lib/utils.sh"    || { echo "ERREUR: lib/utils.sh manquant"; exit 1; }  
-source "${SCRIPT_DIR}/lib/logger.sh"   || { echo "ERREUR: lib/logger.sh manquant"; exit 1; }
+source "${SCRIPT_DIR}/lib/logger.sh"   || { echo "ERREUR: lib/logger.sh manquant"; exit 1; }  
+source "${SCRIPT_DIR}/lib/utils.sh"    || { echo "ERREUR: lib/utils.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/parser.sh"   || { echo "ERREUR: lib/parser.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/detector.sh" || { echo "ERREUR: lib/detector.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/executor.sh" || { echo "ERREUR: lib/executor.sh manquant"; exit 1; }  
 1
+# ── Codes d'erreur ───────────────────────────────────────────
+E_MISSING_PARAM=1
+E_INVALID_OPTION=2
+E_INVALID_CSV=3
+
 # ── Valeurs par défaut ───────────────────────────────────────
 MODE=""
 CSV_FILE=""
@@ -32,6 +37,7 @@ DO_REPORT=false
 DO_STATS=false
 EXPORT_FILE=""
 INTERNAL_MODE=""    # Utilisé par les programmes C pour rappeler ce script
+
 
 export THRESHOLD WINDOW_MINUTES FILTER_USER EXPORT_FILE
 export CURRENT_USER="${USER:-$(whoami)}"   
@@ -128,7 +134,7 @@ fi
 
 # ── Initialisation ───────────────────────────────────────────
 init_logger "$LOG_CUSTOM_DIR"
-validate_csv "$CSV_FILE"
+validate_csv "$CSV_FILE" || die "$E_INVALID_CSV" "Validation CSV échouée"
 
 echo -e "${BLUE}[INFO]${RESET} Chargement du fichier CSV..."
 CSV_DATA=$(filter_by_user "$CSV_FILE" "$FILTER_USER")

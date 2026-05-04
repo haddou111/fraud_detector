@@ -1,13 +1,26 @@
 #!/bin/bash
 
+# ── Couleurs ANSI (définies aussi dans logger.sh, mais nécessaires ici) ──
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+BLUE="\033[0;34m"
+PURPLE="\033[0;35m"
+RESET="\033[0m"
+
 # Vérifie qu'une commande est disponible
 require_cmd() {
-    command -v "$1" &>/dev/null || { log_error "Commande requise introuvable: $1"; exit 1; }
+    command -v "$1" &>/dev/null || { 
+        log_error "Commande requise introuvable: $1"
+        exit 1 
+    }
 }
 
 # Vérifie qu'un fichier existe et est lisible
 require_file() {
-    [[ -r "$1" ]] || { log_error "Fichier introuvable ou illisible: $1"; exit 1; }
+    [[ -r "$1" ]] || { 
+        log_error "Fichier introuvable ou illisible: $1"
+        exit 1 
+    }
 }
 
 # Affiche l'usage
@@ -20,14 +33,18 @@ usage() {
 die() {
     local code="$1"
     local message="$2"
-    echo -e "${RED}[ERREUR]${RESET} $message" >&2
+    log_error "$message"
     exit "$code"
 }
 
 
 # Vérifie si l'utilisateur courant est root
 check_root() {
-    : # TODO: implémenter
+    if [ "$EUID" -ne 0 ]; then
+        log_error "Cette opération nécessite les droits root (administrateur)"
+        echo -e "${BLUE}[INFO]${RESET} Relancez avec : sudo $0 $*" >&2
+        exit 1
+    fi
 }
 
 # Affiche l'aide complète

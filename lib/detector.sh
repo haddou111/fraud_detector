@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # detector.sh — Algorithmes de détection de fraude
 # Utilisé par fraud_detector.sh via : source lib/detector.sh
 #
@@ -13,12 +14,13 @@
 # Détecte toute transaction dont le montant dépasse THRESHOLD
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
+
 detect_high_amount() {
     : # TODO: implémenter
     local csv_data="$1"
     local threshold="${THRESHOLD:-8000}"
     local found=0
-
+                      
     while IFS='|' read -r id timestamp user src_acc dest_acc amount; do
         # Nettoyer les espaces autour des valeurs
         amount=$(echo "$amount" | tr -d ' ')
@@ -130,7 +132,7 @@ detect_behavior_change() {
                 amounts+=("$amount")
             fi
         done <<< "$csv_data"
-
+        
         local n=${#amounts[@]}
         if [ "$n" -lt 2 ]; then
             continue

@@ -89,7 +89,7 @@ validate_header() {
 # ============================================
 validate_columns() {
     local transaction_id="$1"
-     local user="$2"
+    local user="$2"
     local amount="$3"
     local timestamp="$4"
     local card_number="$5"
