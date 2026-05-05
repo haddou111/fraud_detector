@@ -8,22 +8,9 @@
 # Exemple : ./parser.sh data.csv Alice
 # ============================================
 
-# --- Configuration ---
-LOG_DIR="/var/log/FRAUD_DETECTOR"
-mkdir -p "$LOG_DIR"
-HISTORY_LOG="$LOG_DIR/history.log"
-
-# Redirige stdout et stderr vers le terminal ET le fichier log
-exec > >(tee -a "$HISTORY_LOG") 2> >(tee -a "$HISTORY_LOG" >&2)
-
-# ============================================
-# Fonction : log_error
-# But      : Affiche et enregistre un message d'erreur
-# Arguments: $1 = message d'erreur
-# ============================================
-log_error() {
-    echo "ERROR: $1" >&2
-}
+# Charge le fichier logger.sh qui contient log_error(), log_info() et FILE_LOG
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/logger.sh"
 
 
 # ============================================
@@ -64,9 +51,10 @@ validate_csv() {
 # ============================================
 validate_header() {
     local file="$1"
-    local expected="transaction_id|amount|timestamp|users|card_number"
+    local expected="ID|TIMESTAMP|USER|SOURCE_ACCOUNT|DEST_ACCOUNT|AMOUNT"
     local header
-    header=$(head -1 "$file")
+
+    header=$(head -n 1 "$file" | tr -d '\r')
 
     if [[ "$header" != "$expected" ]]; then
         log_error "En-tête CSV invalide: $header"
@@ -80,67 +68,50 @@ validate_header() {
 # Fonction : validate_columns
 # But      : Valide les champs d'une ligne de transaction
 # Arguments:
-#   $1 = transaction_id
-  #  $2 = user
-#   $3 = amount
-#   $4 = timestamp
-#   $5 = card_number
+#   $1 = id
+#   $2 = timestamp
+#   $3 = user
+#   $4 = source_account
+#   $5 = dest_account
+#   $6 = amount
 # Retour   : 0 si valide, 1 si erreur(s) détectée(s)
 # ============================================
 validate_columns() {
-    local transaction_id="$1"
-     local user="$2"
-    local amount="$3"
-    local timestamp="$4"
-    local card_number="$5"
-    local valid=0   # 0 = pas d'erreur
+    local id="$1"
+    local timestamp="$2"
+    local user="$3"
+    local source_account="$4"
+    local dest_account="$5"
+    local amount="$6"
+    local valid=0
 
-    # Validation du transaction_id
-    if [[ -z "$transaction_id" ]]; then
-        log_error "transaction_id manquant"
-        valid=1
-    elif ! [[ "$transaction_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
-        log_error "transaction_id invalide: $transaction_id"
+    if [[ -z "$id" || ! "$id" =~ ^[0-9]+$ ]]; then
+        log_error "ID invalide: $id"
         valid=1
     fi
 
-    # Validation du user
-    if [[ -z "$user" ]]; then
-        log_error "Utilisateur manquant"
-        valid=1
-    elif ! [[ "$user" =~ ^[A-Za-z]+$ ]]; then
-        log_error "Utilisateur invalide: $user"
+    if [[ -z "$timestamp" || ! "$timestamp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}\ [0-9]{2}:[0-9]{2}:[0-9]{2}$ ]] || ! date -d "$timestamp" >/dev/null 2>&1; then
+        log_error "TIMESTAMP invalide: $timestamp"
         valid=1
     fi
 
-    # Validation du montant (nombre positif, max 2 décimales)
-    if [[ -z "$amount" ]]; then
-        log_error "Amount manquant"
-        valid=1
-    elif ! [[ "$amount" =~ ^[0-9]+([.][0-9]{1,2})?$ ]]; then
-        log_error "Amount invalide: $amount"
-        valid=1
-    elif [[ "$amount" =~ ^0+([.][0-9]+)?$ ]]; then
-        log_error "Amount doit être supérieur à 0: $amount"
+    if [[ -z "$user" || ! "$user" =~ ^[A-Za-z]+$ ]]; then
+        log_error "USER invalide: $user"
         valid=1
     fi
 
-    # Validation du timestamp (format ISO 8601)
-    if [[ -z "$timestamp" ]]; then
-        log_error "Timestamp manquant"
-        valid=1
-    elif ! [[ "$timestamp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$ ]] \
-        || ! date -d "$timestamp" >/dev/null 2>&1; then
-        log_error "Timestamp invalide: $timestamp"
+    if [[ -z "$source_account" || ! "$source_account" =~ ^ACC[0-9]+$ ]]; then
+        log_error "SOURCE_ACCOUNT invalide: $source_account"
         valid=1
     fi
 
-    # Validation du numéro de carte (format ****XXXX)
-    if [[ -z "$card_number" ]]; then
-        log_error "card_number manquant"
+    if [[ -z "$dest_account" || ! "$dest_account" =~ ^ACC[0-9]+$ ]]; then
+        log_error "DEST_ACCOUNT invalide: $dest_account"
         valid=1
-    elif ! [[ "$card_number" =~ ^\*{4}[0-9]{4}$ ]]; then
-        log_error "card_number invalide: $card_number"
+    fi
+
+    if [[ -z "$amount" || ! "$amount" =~ ^[0-9]+([.][0-9]{1,2})?$ || "$amount" == "0" ]]; then
+        log_error "AMOUNT invalide: $amount"
         valid=1
     fi
 
@@ -152,15 +123,14 @@ validate_columns() {
 # But      : Parse une ligne CSV et valide ses champs
 # Arguments: $1 = ligne CSV brute
 # Retour   : 0 si valide, 1 sinon
-# Note     : Ordre des colonnes : transaction_id|amount|timestamp|users|card_number
+# Note     : Ordre des colonnes : ID|TIMESTAMP|USER|SOURCE_ACCOUNT|DEST_ACCOUNT|AMOUNT
 # ============================================
 parse_line() {
     local line="$1"
 
-    # Lecture des champs selon l'ordre de l'en-tête
-    IFS='|' read -r TRANSACTION_ID AMOUNT TIMESTAMP USERS CARD_NUMBER <<< "$line"
+    IFS='|' read -r ID TIMESTAMP USER SOURCE_ACCOUNT DEST_ACCOUNT AMOUNT <<< "$line"
 
-    if ! validate_columns "$TRANSACTION_ID" "$AMOUNT" "$TIMESTAMP" "$USERS" "$CARD_NUMBER"; then
+    if ! validate_columns "$ID" "$TIMESTAMP" "$USER" "$SOURCE_ACCOUNT" "$DEST_ACCOUNT" "$AMOUNT"; then
         return 1
     fi
 
@@ -181,39 +151,49 @@ filter_by_user() {
 
     # Si aucun utilisateur donné, afficher tout le fichier
     if [[ -z "$user_filter" ]]; then
-        cat "$file" | tee -a "$HISTORY_LOG"
+        while IFS= read -r line; do
+            log_info "$line"
+        done < "$file"
         return 0
     fi
 
     # Afficher l'en-tête
-    head -n 1 "$file" | tee -a "$HISTORY_LOG"
+    log_info "$(head -n 1 "$file")"
 
-    # Filtrer selon la colonne USERS (colonne 4) en ignorant l'en-tête
-    # tee permet d'afficher ET d'enregistrer dans le log en même temps
-    awk -v user="$user_filter" 'NR>1 && $4==user' "$file" | tee -a "$HISTORY_LOG"
+    # Filtrer selon la colonne USER (colonne 3) en ignorant l'en-tête
+    while IFS= read -r line; do
+        log_info "$line"
+    done < <(awk -F'|' -v user="$user_filter" 'NR>1 && $3==user' "$file")
 
     return 0
 }
 
 # ============================================
 # Fonction : show_stats
-# But      : Affiche le min, max et la moyenne de la colonne amount (col 2)
+# But      : Affiche le min, max et la moyenne de la colonne amount (col 6)
 # Arguments: $1 = chemin du fichier CSV
-# Note     : Ignore l'en-tête (NR>1 / tail -n +2)
+# Note     : Ignore l'en-tête (NR>1)
 # ============================================
 show_stats() {
     local file="$1"
 
-    # Tri sur la colonne 2 (amount) en ignorant l'en-tête
-    local max
-    local min
-    max=$(tail -n +2 "$file" | sort -t'|' -k2 -n | tail -1)
-    min=$(tail -n +2 "$file" | sort -t'|' -k2 -n | head -1)
-
-    echo "Le maximum des montants : $max" | tee -a "$HISTORY_LOG"
-    echo "Le minimum des montants : $min" | tee -a "$HISTORY_LOG"
-
-    # Calcul de la moyenne de la colonne 2 en ignorant l'en-tête
-    awk -F'|' 'NR>1 { sum += $2 } END { print "Moyenne des montants:", sum/(NR-1) }' "$file" 
-        | tee -a "$HISTORY_LOG"
+    awk -F'|' '
+    NR > 1 {
+        amount = $6 + 0
+        if (count == 0 || amount < min) min = amount
+        if (count == 0 || amount > max) max = amount
+        sum += amount
+        count++
+    }
+    END {
+        if (count > 0) {
+            print "Le minimum des montants : " min
+            print "Le maximum des montants : " max
+            print "Moyenne des montants : " sum / count
+        } else {
+            print "Aucune transaction trouvée"
+        }
+    }' "$file" | while IFS= read -r line; do
+        log_info "$line"
+    done
 }
