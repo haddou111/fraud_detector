@@ -6,21 +6,12 @@
 #   THRESHOLD      : seuil montant (défaut 8000)
 #   WINDOW_MINUTES : fenêtre temporelle en minutes (défaut 5)
 
-<<<<<<< HEAD
-=======
-# Détecte les transactions dont le montant dépasse THRESHOLD
-# $1 : contenu CSV (texte)
->>>>>>> origin/main
 # ─────────────────────────────────────────────
 # ALGO 1 — HIGH_AMOUNT
 # Détecte toute transaction dont le montant dépasse THRESHOLD
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
 detect_high_amount() {
-<<<<<<< HEAD
-=======
-    : # TODO: implémenter
->>>>>>> origin/main
     local csv_data="$1"
     local threshold="${THRESHOLD:-8000}"
     local found=0
@@ -49,21 +40,12 @@ detect_high_amount() {
     return $((1 - found))  # retourne 0 si au moins une alerte, 1 sinon
 }
 
-<<<<<<< HEAD
-=======
-# Détecte les transactions trop rapprochées dans le temps (< WINDOW_MINUTES)
-# $1 : contenu CSV (texte)
->>>>>>> origin/main
 # ─────────────────────────────────────────────
 # ALGO 2 — FREQUENCY_ANOMALY
 # Détecte les utilisateurs qui font plus de 3 transactions en WINDOW_MINUTES
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
 detect_frequency_anomaly() {
-<<<<<<< HEAD
-=======
-    : # TODO: implémenter
->>>>>>> origin/main
     local csv_data="$1"
     local window="${WINDOW_MINUTES:-5}"
     local window_sec=$((window * 60))
@@ -114,21 +96,12 @@ detect_frequency_anomaly() {
     return $((1 - found))
 }
 
-<<<<<<< HEAD
-=======
-# Détecte un changement de comportement inhabituel pour un utilisateur
-# $1 : contenu CSV (texte)
->>>>>>> origin/main
 # ─────────────────────────────────────────────
 # ALGO 3 — BEHAVIOR_CHANGE
 # Détecte un passage brutal de petits à grands montants (ratio > 10x)
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
 detect_behavior_change() {
-<<<<<<< HEAD
-=======
-    : # TODO: implémenter
->>>>>>> origin/main
     local csv_data="$1"
     local ratio_threshold=10
     local found=0
@@ -177,11 +150,6 @@ detect_behavior_change() {
     return $((1 - found))
 }
 
-<<<<<<< HEAD
-=======
-# Détecte le fractionnement de montants pour contourner le seuil
-# $1 : contenu CSV (texte)
->>>>>>> origin/main
 # ─────────────────────────────────────────────
 # ALGO 4 — STRUCTURING (Smurfing)
 # Détecte des transactions répétées entre 90% et 100% du seuil
@@ -189,10 +157,6 @@ detect_behavior_change() {
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
 detect_structuring() {
-<<<<<<< HEAD
-=======
-    : # TODO: implémenter
->>>>>>> origin/main
     local csv_data="$1"
     local threshold="${THRESHOLD:-8000}"
     # Zone suspecte : entre 90% et 100% du seuil
@@ -229,21 +193,12 @@ detect_structuring() {
     return $((1 - found))
 }
 
-<<<<<<< HEAD
-=======
-# Détecte les changements fréquents de compte sur une courte période
-# $1 : contenu CSV (texte)
->>>>>>> origin/main
 # ─────────────────────────────────────────────
 # ALGO 5 — ACCOUNT_SWITCHING
 # Détecte les changements fréquents de compte destinataire (> 3 comptes différents)
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
 detect_account_switching() {
-<<<<<<< HEAD
-=======
-    : # TODO: implémenter
->>>>>>> origin/main
     local csv_data="$1"
     local found=0
 
@@ -276,10 +231,6 @@ detect_account_switching() {
     return $((1 - found))
 }
 
-<<<<<<< HEAD
-=======
-# Point d'entrée principal de détection pour une transaction
->>>>>>> origin/main
 # ─────────────────────────────────────────────
 # Point d'entrée principal
 # Appelé transaction par transaction depuis executor.sh
@@ -287,12 +238,6 @@ detect_account_switching() {
 # $2 : amount
 # ─────────────────────────────────────────────
 analyze_transaction() {
-<<<<<<< HEAD
-=======
-    local transaction_id="$1" amount="$2"
-    if detect_high_amount "$amount"; then
-        log_warn "Fraude potentielle détectée — ID: $transaction_id, Montant: $amount"
->>>>>>> origin/main
     local transaction_id="$1"
     local amount="$2"
     local threshold="${THRESHOLD:-8000}"
