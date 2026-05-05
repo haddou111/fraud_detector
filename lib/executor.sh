@@ -7,22 +7,99 @@ declare -A SCENARIO_FILES=(
     [lourd]="$DATA_DIR/transactions_heavy.csv"
 )
 
-# Lance les 5 algorithmes en parallèle via des sous-shells bash ( ) &
+# Lance les 5 algorithmes via subshell_runner.c
 # $1 : contenu CSV  $2 : chemin du fichier CSV
 run_subshell() {
-    : # TODO: implémenter
+    local csv_content="$1"
+    local csv_file="$2"
+    local threshold="${THRESHOLD:-8000}"
+    
+    # Vérifier si subshell_runner existe, sinon le compiler
+    if [ ! -f "./subshell_runner" ]; then
+        log_info "Compilation de subshell_runner.c..."
+        gcc -o subshell_runner subshell_runner.c 2>/dev/null
+        if [ $? -ne 0 ]; then
+            log_error "Échec compilation subshell_runner"
+            return 1
+        fi
+    fi
+    
+    # Exécuter subshell_runner avec les paramètres requis
+    log_info "Lancement subshell_runner (mode parallèle avec sous-shells)"
+    ./subshell_runner "fraud_detector.sh" "$csv_file" "$threshold" "$LOG_FILE"
+    
+    local ret=$?
+    if [ $ret -eq 0 ]; then
+        log_info "subshell_runner terminé avec succès"
+    else
+        log_error "subshell_runner échec (code: $ret)"
+    fi
+    
+    return $ret
 }
 
 # Lance les 5 algorithmes via fork_runner.c (appels système fork/wait)
 # $1 : contenu CSV  $2 : chemin du fichier CSV
 run_fork() {
-    : # TODO: implémenter
+    local csv_content="$1"
+    local csv_file="$2"
+    local threshold="${THRESHOLD:-8000}"
+    
+    # Vérifier si fork_runner existe, sinon le compiler
+    if [ ! -f "./fork_runner" ]; then
+        log_info "Compilation de fork_runner.c..."
+        gcc -o fork_runner fork_runner.c 2>/dev/null
+        if [ $? -ne 0 ]; then
+            log_error "Échec compilation fork_runner"
+            return 1
+        fi
+    fi
+    
+    # Exécuter fork_runner avec les paramètres requis
+    log_info "Lancement fork_runner (mode parallèle avec fork())"
+    ./fork_runner "fraud_detector.sh" "$csv_file" "$threshold" "$LOG_FILE"
+    
+    local ret=$?
+    if [ $ret -eq 0 ]; then
+        log_info "fork_runner terminé avec succès"
+    else
+        log_error "fork_runner échec (code: $ret)"
+    fi
+    
+    return $ret
 }
 
 # Lance les 5 algorithmes via thread_runner.c (pthreads POSIX)
 # $1 : contenu CSV  $2 : chemin du fichier CSV
+# Lance les 5 algorithmes via thread_runner.c (pthreads POSIX)
+# $1 : contenu CSV  $2 : chemin du fichier CSV
 run_threads() {
-    : # TODO: implémenter
+    local csv_content="$1"
+    local csv_file="$2"
+    local threshold="${THRESHOLD:-8000}"
+    
+    # Vérifier si thread_runner existe, sinon le compiler
+    if [ ! -f "./thread_runner" ]; then
+        log_info "Compilation de thread_runner.c..."
+        gcc -o thread_runner thread_runner.c -lpthread 2>/dev/null
+        if [ $? -ne 0 ]; then
+            log_error "Échec compilation thread_runner"
+            return 1
+        fi
+    fi
+    
+    # Exécuter thread_runner avec les paramètres requis
+    log_info "Lancement thread_runner (mode parallèle avec pthreads)"
+    ./thread_runner "fraud_detector.sh" "$csv_file" "$threshold" "$LOG_FILE"
+    
+    local ret=$?
+    if [ $ret -eq 0 ]; then
+        log_info "thread_runner terminé avec succès"
+    else
+        log_error "thread_runner échec (code: $ret)"
+    fi
+    
+    return $ret
 }
 
 # Sélectionne le fichier selon le mode
