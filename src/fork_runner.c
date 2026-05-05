@@ -13,8 +13,11 @@
  * Architecture :
  *   Parent (fork_runner)
  *   ├── Fils 1 : exécute detect_high_amount via script Bash
- *   └── Fils 2 : exécute detect_frequency_anomaly via script Bash
- *   Parent : wait() sur les deux fils puis affiche les résultats
+ *   ├── Fils 2 : exécute detect_frequency_anomaly via script Bash
+ *   ├── Fils 3 : exécute detect_behavior_change via script Bash
+ *   ├── Fils 4 : exécute detect_structuring via script Bash
+ *   └── Fils 5 : exécute detect_account_switching via script Bash
+ *   Parent : wait() sur les cinq fils puis affiche les résultats
  * ============================================================
  */
 
@@ -105,7 +108,7 @@ int main(int argc, char *argv[])
     const char *threshold   = argv[3];
     const char *log_file    = argv[4];
 
-    printf(BOLD "\n[FORK MODE] Parent PID=%d — Création de 2 fils...\n\n" RESET, getpid());
+    printf(BOLD "\n[FORK MODE] Parent PID=%d — Création de 5 fils...\n\n" RESET, getpid());
 
     /* Mesure du temps d'exécution */
     clock_t start = clock();
@@ -118,15 +121,27 @@ int main(int argc, char *argv[])
     pid_t fils2 = launch_child(script_path, "--internal-frequency",
                                 csv_file, threshold, log_file, 2);
 
+    /* ── FORK 3 : BEHAVIOR_CHANGE ─────────────────────────── */
+    pid_t fils3 = launch_child(script_path, "--internal-behavior",
+                                csv_file, threshold, log_file, 3);
+
+    /* ── FORK 4 : STRUCTURING ─────────────────────────────── */
+    pid_t fils4 = launch_child(script_path, "--internal-structuring",
+                                csv_file, threshold, log_file, 4);
+
+    /* ── FORK 5 : ACCOUNT_SWITCHING ───────────────────────── */
+    pid_t fils5 = launch_child(script_path, "--internal-switching",
+                                csv_file, threshold, log_file, 5);
+
     /*
      * ── SYNCHRONISATION : wait() ───────────────────────────
      * Le parent se bloque jusqu'à ce que chaque fils termine.
-     * C'est l'équivalent de pthread_join() pour les threads.
      */
     printf(BLUE "\n[FORK] Parent en attente des fils (wait)...\n" RESET);
     fflush(stdout);
 
-    int status1, status2;
+    int status1, status2, status3, status4, status5;
+    
     waitpid(fils1, &status1, 0);   /* <-- APPEL SYSTÈME wait() */
     printf(GREEN "[FORK] Fils 1 (PID=%d) terminé — code: %d\n" RESET,
            fils1, WEXITSTATUS(status1));
@@ -135,12 +150,24 @@ int main(int argc, char *argv[])
     printf(GREEN "[FORK] Fils 2 (PID=%d) terminé — code: %d\n" RESET,
            fils2, WEXITSTATUS(status2));
 
+    waitpid(fils3, &status3, 0);   /* <-- APPEL SYSTÈME wait() */
+    printf(GREEN "[FORK] Fils 3 (PID=%d) terminé — code: %d\n" RESET,
+           fils3, WEXITSTATUS(status3));
+
+    waitpid(fils4, &status4, 0);   /* <-- APPEL SYSTÈME wait() */
+    printf(GREEN "[FORK] Fils 4 (PID=%d) terminé — code: %d\n" RESET,
+           fils4, WEXITSTATUS(status4));
+
+    waitpid(fils5, &status5, 0);   /* <-- APPEL SYSTÈME wait() */
+    printf(GREEN "[FORK] Fils 5 (PID=%d) terminé — code: %d\n" RESET,
+           fils5, WEXITSTATUS(status5));
+
     /* Calcul de la durée totale */
     clock_t end = clock();
     double duration = (double)(end - start) / CLOCKS_PER_SEC;
 
-    printf(CYAN "\n[PERF] Mode: fork | Durée: %.3fs | PID parent: %d | PIDs fils: %d, %d\n" RESET,
-           duration, getpid(), fils1, fils2);
+    printf(CYAN "\n[PERF] Mode: fork | Durée: %.3fs | PID parent: %d | PIDs fils: %d, %d, %d, %d, %d\n" RESET,
+           duration, getpid(), fils1, fils2, fils3, fils4, fils5);
 
     return EXIT_SUCCESS;
 }
