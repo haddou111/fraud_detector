@@ -41,6 +41,7 @@ FILTER_USER=""
 DO_REPORT=false
 DO_STATS=false
 EXPORT_FILE=""
+SINGLE_ALGO=""
 INTERNAL_MODE=""    # Utilisé par les programmes C pour rappeler ce script
 
 
@@ -88,6 +89,15 @@ while [[ $# -gt 0 ]]; do
         --export)
             [[ -z "$2" ]] && die "$E_MISSING_PARAM" "--export requiert un nom de fichier"
             EXPORT_FILE="${SCRIPT_DIR}/reports/$2"; export EXPORT_FILE; shift 2 ;;
+
+        --algo)
+            [[ -z "$2" ]] && die "$E_MISSING_PARAM" "--algo requiert un nom d'algorithme (high|frequency|behavior|structuring|switching)"
+            case "$2" in
+                high|frequency|behavior|structuring|switching)
+                    SINGLE_ALGO="$2"; export SINGLE_ALGO; shift 2 ;;
+                *)
+                    die "$E_INVALID_OPTION" "Algorithme invalide: '$2'. Utilisez: high, frequency, behavior, structuring, switching" ;;
+            esac ;;
 
         --log-file)
             # Utilisé par les binaires C pour spécifier le fichier log
@@ -179,6 +189,7 @@ if [[ -z "$CSV_DATA" ]]; then
 fi
 
 NB_LINES=$(echo "$CSV_DATA" | wc -l | tr -d ' ')
+
 log_info "[INIT] $NB_LINES transactions chargées"
 log_info "[INIT] Démarrage fraud_detector.sh — mode: $MODE — fichier: $CSV_FILE"
 
@@ -199,13 +210,34 @@ echo -e "  Seuil    : ${BOLD}$THRESHOLD MAD${RESET}"
 echo -e "${PURPLE}═══════════════════════════════════════════════${RESET}\n"
 
 # ── Lancement du mode choisi ─────────────────────────────────
-case "$MODE" in
-    subshell) run_subshell "$CSV_DATA" "$CSV_FILE" ;;
-    fork)     run_fork     "$CSV_DATA" "$CSV_FILE" ;;
-    threads)  run_threads  "$CSV_DATA" "$CSV_FILE" ;;
-esac
+if [[ -n "$SINGLE_ALGO" ]]; then
+    # Mode algorithme unique
+    log_info "[SINGLE] Exécution de l'algorithme: $SINGLE_ALGO"
+    echo -e "${BOLD}${CYAN}══════════════ ALGORITHME UNIQUE ══════════════${RESET}"
+    echo -e "  Algorithme : ${BOLD}$SINGLE_ALGO${RESET}"
+    echo -e "${CYAN}═══════════════════════════════════════════════${RESET}\n"
+    
+    ALERT_COUNT=0
+    case "$SINGLE_ALGO" in
+        high)        detect_high_amount "$CSV_DATA" && ALERT_COUNT=1 ;;
+        frequency)   detect_frequency_anomaly "$CSV_DATA" && ALERT_COUNT=1 ;;
+        behavior)    detect_behavior_change "$CSV_DATA" && ALERT_COUNT=1 ;;
+        structuring) detect_structuring "$CSV_DATA" && ALERT_COUNT=1 ;;
+        switching)   detect_account_switching "$CSV_DATA" && ALERT_COUNT=1 ;;
+    esac
+    
+    TOTAL_ALERTS=$ALERT_COUNT
+    log_info "[SINGLE] Algorithme $SINGLE_ALGO terminé avec $TOTAL_ALERTS alerte(s)"
+else
+    # Mode normal avec tous les algorithmes
+    case "$MODE" in
+        subshell) run_subshell "$CSV_DATA" "$CSV_FILE" ;;
+        fork)     run_fork     "$CSV_DATA" "$CSV_FILE" ;;
+        threads)  run_threads  "$CSV_DATA" "$CSV_FILE" ;;
+    esac
 
-TOTAL_ALERTS=$?  # en recupere le code de retourn de la fonction appelée apres la fin de son execution 
+    TOTAL_ALERTS=$?  # en recupere le code de retourn de la fonction appelée apres la fin de son execution 
+fi 
 
 # ── Rapport (--report) ───────────────────────────────────────
 if $DO_REPORT; then

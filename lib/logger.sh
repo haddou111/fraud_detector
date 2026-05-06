@@ -32,17 +32,16 @@ init_logger() {
     # Création du dossier de logs si inexistant
     if [ ! -d "$LOG_DIR" ]; then
         mkdir -p "$LOG_DIR" 2>/dev/null || {
-            echo -e "${RED}[ERROR] Impossible de créer le dossier de logs${RESET}"
+            echo -e "${RED}[ERROR] Impossible de créer le dossier de logs: $LOG_DIR${RESET}"
             exit 106
         }
     fi
     # Création du fichier log si inexistant
     if [ ! -f "$LOG_FILE" ]; then
         touch "$LOG_FILE" 2>/dev/null || {
-    echo -e "${RED}[ERROR] Impossible de créer le fichier log${RESET}"
-    exit 106
-    }
-        
+            echo -e "${RED}[ERROR] Impossible de créer le fichier log: $LOG_FILE${RESET}"
+            exit 106
+        }
     fi
     # Permissions sécurisées du fichier log
     chmod u=rw,go=r "$LOG_FILE" 2>/dev/null || {

@@ -61,6 +61,7 @@ Options :
   --threshold N   Seuil de montant suspect (défaut: 8000)
   --window N      Fenêtre temporelle en minutes (défaut: 5)
   --user NOM      Filtrer par utilisateur
+  --algo ALGO     Exécuter un seul algorithme (high|frequency|behavior|structuring|switching)
   --report        Générer un rapport texte
   --stats         Afficher les statistiques du CSV
   --export FILE   Exporter les alertes dans reports/FILE
@@ -71,5 +72,7 @@ Exemples :
   ./fraud_detector.sh -s data/transactions_light.csv
   ./fraud_detector.sh -f --threshold 5000 data/transactions_medium.csv
   ./fraud_detector.sh -t --report data/transactions_heavy.csv
+  ./fraud_detector.sh -s --algo high data/transactions_heavy.csv
+  ./fraud_detector.sh -f --algo behavior --user Ali data/transactions_heavy.csv
 EOF
 }
