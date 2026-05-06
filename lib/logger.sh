@@ -13,6 +13,7 @@ GREEN="\033[0;32m" # Vert pour les succès
 BLUE="\033[0;34m" # Bleu pour les informations
 PURPLE="\033[0;35m" # violet pour warn
 RESET="\033[0m" # reset couleur 
+BOLD="\033[1m" # gras 
 
 init_logger() {
     local custom_dir="$1"
@@ -20,6 +21,8 @@ init_logger() {
     if [ -n "$custom_dir" ]; then
         LOG_DIR="$custom_dir"
         LOG_FILE="$LOG_DIR/history.log"
+        # Exporter les variables pour les processus enfants
+        export LOG_DIR LOG_FILE
     fi
     # Vérification des droits root si dossier système utilisé
     if [ "$LOG_DIR" = "$DEFAULT_LOG_DIR" ] && [ "$EUID" -ne 0 ]; then

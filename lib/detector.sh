@@ -51,13 +51,13 @@ detect_high_amount() {
     _detector_info "Début détection HIGH_AMOUNT (seuil: ${threshold} MAD)"
 
     while IFS='|' read -r id timestamp user src_acc dest_acc amount; do
-        # Nettoyer les espaces autour des valeurs
-        amount=$(echo "$amount" | tr -d ' ')
-        id=$(echo "$id" | tr -d ' ')
-        user=$(echo "$user" | tr -d ' ')
+        # Nettoyer les espaces ET les retours chariot Windows
+        amount=$(echo "$amount" | tr -d ' \r')
+        id=$(echo "$id" | tr -d ' \r')
+        user=$(echo "$user" | tr -d ' \r')
         timestamp=$(echo "$timestamp" | xargs)
-        src_acc=$(echo "$src_acc" | tr -d ' ')
-        dest_acc=$(echo "$dest_acc" | tr -d ' ')
+        src_acc=$(echo "$src_acc" | tr -d ' \r')
+        dest_acc=$(echo "$dest_acc" | tr -d ' \r')
 
         # Vérifier que le montant est un nombre
         if ! echo "$amount" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
@@ -68,9 +68,8 @@ detect_high_amount() {
         # Comparer avec le seuil
         if [ "$(echo "$amount > $threshold" | bc 2>/dev/null)" = "1" ]; then
             local alert_msg="HIGH_AMOUNT | User: $user | Amount: $amount MAD | $src_acc → $dest_acc"
-            echo "[ALERT] $timestamp | $alert_msg"
             
-            # Utiliser logger pour warning
+            # Logger l'alerte
             _detector_warn "ALERTE FRAUDE: $alert_msg"
             found=1
         fi
@@ -78,11 +77,11 @@ detect_high_amount() {
 
     if [ $found -eq 1 ]; then
         _detector_warn "HIGH_AMOUNT: Détection(s) trouvée(s)"
+        return 0  # Succès : fraude détectée
     else
         _detector_info "HIGH_AMOUNT: Aucune détection"
+        return 1  # Pas de fraude
     fi
-
-    return $((1 - found))
 }
 
 # ALGO 2 — FREQUENCY_ANOMALY
@@ -103,7 +102,7 @@ detect_frequency_anomaly() {
         # Récupérer tous les timestamps de cet utilisateur, convertis en epoch
         local timestamps=()
         while IFS='|' read -r id timestamp u src_acc dest_acc amount; do
-            u=$(echo "$u" | tr -d ' ')
+            u=$(echo "$u" | tr -d ' \r')
             if [ "$u" = "$user" ]; then
                 # Convertir timestamp en epoch Unix
                 local epoch
@@ -137,7 +136,6 @@ detect_frequency_anomaly() {
             done
             if [ "$count" -gt 3 ]; then
                 local alert_msg="FREQUENCY_ANOMALY | User: $user | $count transactions en moins de ${window} min"
-                echo "[ALERT] $alert_msg"
                 _detector_warn "ALERTE FRAUDE: $alert_msg"
                 found=1
                 break
@@ -147,11 +145,11 @@ detect_frequency_anomaly() {
 
     if [ $found -eq 1 ]; then
         _detector_warn "FREQUENCY_ANOMALY: Détection(s) trouvée(s)"
+        return 0
     else
         _detector_info "FREQUENCY_ANOMALY: Aucune détection"
+        return 1
     fi
-
-    return $((1 - found))
 }
 
 # ALGO 3 — BEHAVIOR_CHANGE
@@ -172,8 +170,8 @@ detect_behavior_change() {
 
         # Récupérer les montants de cet utilisateur dans l'ordre
         while IFS='|' read -r id timestamp u src_acc dest_acc amount; do
-            u=$(echo "$u" | tr -d ' ')
-            amount=$(echo "$amount" | tr -d ' ')
+            u=$(echo "$u" | tr -d ' \r')
+            amount=$(echo "$amount" | tr -d ' \r')
             if [ "$u" = "$user" ] && echo "$amount" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
                 amounts+=("$amount")
             fi
@@ -195,7 +193,6 @@ detect_behavior_change() {
                 local ratio=$((current / avg_int))
                 if [ "$ratio" -ge "$ratio_threshold" ]; then
                     local alert_msg="BEHAVIOR_CHANGE | User: $user | Montant habituel ~${avg_int} MAD → Montant actuel: ${current} MAD (ratio x${ratio})"
-                    echo "[ALERT] $alert_msg"
                     _detector_warn "ALERTE FRAUDE: $alert_msg"
                     found=1
                     break
@@ -211,11 +208,11 @@ detect_behavior_change() {
 
     if [ $found -eq 1 ]; then
         _detector_warn "BEHAVIOR_CHANGE: Détection(s) trouvée(s)"
+        return 0
     else
         _detector_info "BEHAVIOR_CHANGE: Aucune détection"
+        return 1
     fi
-
-    return $((1 - found))
 }
 
 # ALGO 4 — STRUCTURING (Smurfing)
@@ -233,8 +230,8 @@ detect_structuring() {
     declare -A user_count
 
     while IFS='|' read -r id timestamp user src_acc dest_acc amount; do
-        user=$(echo "$user" | tr -d ' ')
-        amount=$(echo "$amount" | tr -d ' ')
+        user=$(echo "$user" | tr -d ' \r')
+        amount=$(echo "$amount" | tr -d ' \r')
 
         if ! echo "$amount" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
             continue
@@ -253,7 +250,6 @@ detect_structuring() {
     for user in "${!user_count[@]}"; do
         if [ "${user_count[$user]}" -ge 2 ]; then
             local alert_msg="STRUCTURING | User: $user | ${user_count[$user]} transactions entre ${low} et ${threshold} MAD (zone de smurfing)"
-            echo "[ALERT] $alert_msg"
             _detector_warn "ALERTE FRAUDE: $alert_msg"
             found=1
         elif [ "${user_count[$user]}" -eq 1 ]; then
@@ -263,11 +259,11 @@ detect_structuring() {
 
     if [ $found -eq 1 ]; then
         _detector_warn "STRUCTURING: Détection(s) trouvée(s)"
+        return 0
     else
         _detector_info "STRUCTURING: Aucune détection"
+        return 1
     fi
-
-    return $((1 - found))
 }
 
 # ALGO 5 — ACCOUNT_SWITCHING
@@ -298,9 +294,9 @@ detect_account_switching() {
 
         if [ "$count" -gt 3 ]; then
             local accounts_list
+            local accounts_list
             accounts_list=$(echo "$dest_accounts" | tr '\n' ',' | sed 's/,$//')
             local alert_msg="ACCOUNT_SWITCHING | User: $user | $count comptes destinataires différents: $accounts_list"
-            echo "[ALERT] $alert_msg"
             _detector_warn "ALERTE FRAUDE: $alert_msg"
             found=1
         elif [ "$count" -eq 2 ] || [ "$count" -eq 3 ]; then
@@ -310,11 +306,11 @@ detect_account_switching() {
 
     if [ $found -eq 1 ]; then
         _detector_warn "ACCOUNT_SWITCHING: Détection(s) trouvée(s)"
+        return 0
     else
         _detector_info "ACCOUNT_SWITCHING: Aucune détection"
+        return 1
     fi
-
-    return $((1 - found))
 }
 
 # Point d'entrée principal

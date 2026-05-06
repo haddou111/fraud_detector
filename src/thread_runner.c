@@ -218,11 +218,23 @@ int main(int argc, char *argv[])
     /* Libération du mutex */
     pthread_mutex_destroy(&print_mutex);
 
+    /* Compter le nombre d'alertes (code 0 = fraude détectée) */
+    int total_alerts = 0;
+    for (int i = 0; i < 5; i++)
+    {
+        if (args[i].exit_code == 0)
+        {
+            total_alerts++;
+        }
+    }
+
     clock_t end = clock();
     double duration = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf(CYAN "\n[PERF] Mode: threads | Durée: %.3fs | PID: %d | %d threads\n" RESET,
            duration, getpid(), 5);
+    
+    printf(CYAN "[THREADS] Total alertes détectées: %d\n" RESET, total_alerts);
 
-    return EXIT_SUCCESS;
+    return total_alerts;
 }
