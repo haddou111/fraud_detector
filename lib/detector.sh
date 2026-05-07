@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # detector.sh — Algorithmes de détection de fraude
 # Utilisé par fraud_detector.sh via : source lib/detector.sh
 #
@@ -6,56 +7,92 @@
 #   THRESHOLD      : seuil montant (défaut 8000)
 #   WINDOW_MINUTES : fenêtre temporelle en minutes (défaut 5)
 
-# Détecte les transactions dont le montant dépasse THRESHOLD
-# $1 : contenu CSV (texte)
-# ─────────────────────────────────────────────
+# ============================================
+# FONCTIONS DE WRAPPING POUR LES WARNINGS
+# ============================================
+
+# Vérifier si logger est disponible
+if declare -f log_warn > /dev/null 2>&1; then
+    # Utiliser le logger existant
+    _detector_warn() {
+        log_warn "[DETECTOR] $*"
+    }
+    _detector_info() {
+        log_info "[DETECTOR] $*"
+    }
+    _detector_error() {
+        log_error "[DETECTOR] $*"
+    }
+else
+    # Fallback si logger non disponible
+    _detector_warn() {
+        echo -e "\033[0;35m[WARNING][DETECTOR] $(date '+%Y-%m-%d-%H-%M-%S') - $*\033[0m" >&2
+    }
+    _detector_info() {
+        echo -e "\033[0;34m[INFO][DETECTOR] $(date '+%Y-%m-%d-%H-%M-%S') - $*\033[0m"
+    }
+    _detector_error() {
+        echo -e "\033[0;31m[ERROR][DETECTOR] $(date '+%Y-%m-%d-%H-%M-%S') - $*\033[0m" >&2
+    }
+fi
+
+# ============================================
+# ALGORITHMES DE DÉTECTION
+# ============================================
+
 # ALGO 1 — HIGH_AMOUNT
 # Détecte toute transaction dont le montant dépasse THRESHOLD
 # $1 : contenu CSV complet (texte, sans header)
 # ─────────────────────────────────────────────
 detect_high_amount() {
-    : # TODO: implémenter
     local csv_data="$1"
     local threshold="${THRESHOLD:-8000}"
     local found=0
+    _detector_info "Début détection HIGH_AMOUNT (seuil: ${threshold} MAD)"
 
     while IFS='|' read -r id timestamp user src_acc dest_acc amount; do
-        # Nettoyer les espaces autour des valeurs
-        amount=$(echo "$amount" | tr -d ' ')
-        id=$(echo "$id" | tr -d ' ')
-        user=$(echo "$user" | tr -d ' ')
+        # Nettoyer les espaces ET les retours chariot Windows
+        amount=$(echo "$amount" | tr -d ' \r')
+        id=$(echo "$id" | tr -d ' \r')
+        user=$(echo "$user" | tr -d ' \r')
         timestamp=$(echo "$timestamp" | xargs)
-        src_acc=$(echo "$src_acc" | tr -d ' ')
-        dest_acc=$(echo "$dest_acc" | tr -d ' ')
+        src_acc=$(echo "$src_acc" | tr -d ' \r')
+        dest_acc=$(echo "$dest_acc" | tr -d ' \r')
 
         # Vérifier que le montant est un nombre
         if ! echo "$amount" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
+            _detector_warn "Format de montant invalide pour transaction $id: $amount"
             continue
         fi
 
-        # Comparer avec le seuil (en entier pour éviter les problèmes de virgule)
+        # Comparer avec le seuil
         if [ "$(echo "$amount > $threshold" | bc 2>/dev/null)" = "1" ]; then
-            echo "[ALERT] $timestamp | HIGH_AMOUNT | User: $user | Amount: $amount MAD | $src_acc → $dest_acc"
+            local alert_msg="HIGH_AMOUNT | User: $user | Amount: $amount MAD | $src_acc → $dest_acc"
+            
+            # Logger l'alerte
+            _detector_warn "ALERTE FRAUDE: $alert_msg"
             found=1
         fi
     done <<< "$csv_data"
 
-    return $((1 - found))  # retourne 0 si au moins une alerte, 1 sinon
+    if [ $found -eq 1 ]; then
+        _detector_warn "HIGH_AMOUNT: Détection(s) trouvée(s)"
+        return 0  # Succès : fraude détectée
+    else
+        _detector_info "HIGH_AMOUNT: Aucune détection"
+        return 1  # Pas de fraude
+    fi
 }
 
-# Détecte les transactions trop rapprochées dans le temps (< WINDOW_MINUTES)
-# $1 : contenu CSV (texte)
-# ─────────────────────────────────────────────
 # ALGO 2 — FREQUENCY_ANOMALY
 # Détecte les utilisateurs qui font plus de 3 transactions en WINDOW_MINUTES
-# $1 : contenu CSV complet (texte, sans header)
-# ─────────────────────────────────────────────
 detect_frequency_anomaly() {
-    : # TODO: implémenter
     local csv_data="$1"
     local window="${WINDOW_MINUTES:-5}"
     local window_sec=$((window * 60))
     local found=0
+
+    _detector_info "Début détection FREQUENCY_ANOMALY (fenêtre: ${window} minutes)"
 
     # Récupérer la liste des utilisateurs uniques
     local users
@@ -65,21 +102,27 @@ detect_frequency_anomaly() {
         # Récupérer tous les timestamps de cet utilisateur, convertis en epoch
         local timestamps=()
         while IFS='|' read -r id timestamp u src_acc dest_acc amount; do
-            u=$(echo "$u" | tr -d ' ')
+            u=$(echo "$u" | tr -d ' \r')
             if [ "$u" = "$user" ]; then
-                # Convertir timestamp "2026-04-10 10:02:00" en epoch Unix
+                # Convertir timestamp en epoch Unix
                 local epoch
                 epoch=$(date -d "$(echo "$timestamp" | xargs)" +%s 2>/dev/null)
                 if [ -n "$epoch" ]; then
                     timestamps+=("$epoch")
+                else
+                    _detector_warn "Format timestamp invalide pour $user: $timestamp"
                 fi
             fi
         done <<< "$csv_data"
 
         # Trier les timestamps
+        if [ ${#timestamps[@]} -eq 0 ]; then
+            continue
+        fi
+        
         IFS=$'\n' sorted=($(sort -n <<< "${timestamps[*]}")); unset IFS
 
-        # Fenêtre glissante : compter combien de transactions en < window_sec
+        # Fenêtre glissante
         local n=${#sorted[@]}
         for ((i=0; i<n; i++)); do
             local count=1
@@ -92,28 +135,31 @@ detect_frequency_anomaly() {
                 fi
             done
             if [ "$count" -gt 3 ]; then
-                echo "[ALERT] FREQUENCY_ANOMALY | User: $user | $count transactions en moins de ${window} min"
+                local alert_msg="FREQUENCY_ANOMALY | User: $user | $count transactions en moins de ${window} min"
+                _detector_warn "ALERTE FRAUDE: $alert_msg"
                 found=1
-                break  # une seule alerte par utilisateur
+                break
             fi
         done
     done
 
-    return $((1 - found))
+    if [ $found -eq 1 ]; then
+        _detector_warn "FREQUENCY_ANOMALY: Détection(s) trouvée(s)"
+        return 0
+    else
+        _detector_info "FREQUENCY_ANOMALY: Aucune détection"
+        return 1
+    fi
 }
 
-# Détecte un changement de comportement inhabituel pour un utilisateur
-# $1 : contenu CSV (texte)
-# ─────────────────────────────────────────────
 # ALGO 3 — BEHAVIOR_CHANGE
 # Détecte un passage brutal de petits à grands montants (ratio > 10x)
-# $1 : contenu CSV complet (texte, sans header)
-# ─────────────────────────────────────────────
 detect_behavior_change() {
-    : # TODO: implémenter
     local csv_data="$1"
     local ratio_threshold=10
     local found=0
+
+    _detector_info "Début détection BEHAVIOR_CHANGE (ratio seuil: ${ratio_threshold}x)"
 
     # Récupérer la liste des utilisateurs uniques
     local users
@@ -124,63 +170,68 @@ detect_behavior_change() {
 
         # Récupérer les montants de cet utilisateur dans l'ordre
         while IFS='|' read -r id timestamp u src_acc dest_acc amount; do
-            u=$(echo "$u" | tr -d ' ')
-            amount=$(echo "$amount" | tr -d ' ')
+            u=$(echo "$u" | tr -d ' \r')
+            amount=$(echo "$amount" | tr -d ' \r')
             if [ "$u" = "$user" ] && echo "$amount" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
                 amounts+=("$amount")
             fi
         done <<< "$csv_data"
-
+        
         local n=${#amounts[@]}
         if [ "$n" -lt 2 ]; then
             continue
         fi
 
         # Comparer chaque montant avec la moyenne des précédents
-        local sum=${amounts[0]}
+        local sum=$(echo "${amounts[0]}" | cut -d'.' -f1)
         for ((i=1; i<n; i++)); do
             local avg=$((sum / i))
-            local current=${amounts[$i]%.*}  # partie entière
+            local current=$(echo "${amounts[$i]}" | cut -d'.' -f1)
             avg_int=${avg%.*}
 
             if [ "$avg_int" -gt 0 ]; then
                 local ratio=$((current / avg_int))
                 if [ "$ratio" -ge "$ratio_threshold" ]; then
-                    echo "[ALERT] BEHAVIOR_CHANGE | User: $user | Montant habituel ~${avg_int} MAD → Montant actuel: ${current} MAD (ratio x${ratio})"
+                    local alert_msg="BEHAVIOR_CHANGE | User: $user | Montant habituel ~${avg_int} MAD → Montant actuel: ${current} MAD (ratio x${ratio})"
+                    _detector_warn "ALERTE FRAUDE: $alert_msg"
                     found=1
                     break
+                elif [ "$ratio" -gt 5 ] && [ "$ratio" -lt 10 ]; then
+                    # Warning modéré pour changement significatif mais pas seuil critique
+                    _detector_warn "Changement modéré détecté pour $user: ratio x${ratio}"
                 fi
             fi
 
-            sum=$((sum + ${amounts[$i]%.*}))
+            sum=$((sum + $(echo "${amounts[$i]}" | cut -d'.' -f1)))
         done
     done
 
-    return $((1 - found))
+    if [ $found -eq 1 ]; then
+        _detector_warn "BEHAVIOR_CHANGE: Détection(s) trouvée(s)"
+        return 0
+    else
+        _detector_info "BEHAVIOR_CHANGE: Aucune détection"
+        return 1
+    fi
 }
 
-# Détecte le fractionnement de montants pour contourner le seuil
-# $1 : contenu CSV (texte)
-# ─────────────────────────────────────────────
 # ALGO 4 — STRUCTURING (Smurfing)
 # Détecte des transactions répétées entre 90% et 100% du seuil
-# Ces montants sont juste en-dessous du seuil pour éviter la détection
-# $1 : contenu CSV complet (texte, sans header)
-# ─────────────────────────────────────────────
 detect_structuring() {
-    : # TODO: implémenter
     local csv_data="$1"
     local threshold="${THRESHOLD:-8000}"
     # Zone suspecte : entre 90% et 100% du seuil
     local low=$(echo "$threshold * 90 / 100" | bc)
     local found=0
 
+    _detector_info "Début détection STRUCTURING (zone: ${low}-${threshold} MAD)"
+
     # Compter combien de fois chaque utilisateur est dans cette zone
     declare -A user_count
 
     while IFS='|' read -r id timestamp user src_acc dest_acc amount; do
-        user=$(echo "$user" | tr -d ' ')
-        amount=$(echo "$amount" | tr -d ' ')
+        user=$(echo "$user" | tr -d ' \r')
+        amount=$(echo "$amount" | tr -d ' \r')
 
         if ! echo "$amount" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
             continue
@@ -191,31 +242,37 @@ detect_structuring() {
         # Montant entre low et threshold (exclu) ?
         if [ "$amount_int" -ge "$low" ] && [ "$amount_int" -lt "$threshold" ]; then
             user_count["$user"]=$(( ${user_count["$user"]:-0} + 1 ))
+            _detector_info "$user: Transaction suspecte de $amount_int MAD (zone de smurfing)"
         fi
     done <<< "$csv_data"
 
     # Alerter si un utilisateur a fait ≥ 2 transactions dans cette zone
     for user in "${!user_count[@]}"; do
         if [ "${user_count[$user]}" -ge 2 ]; then
-            echo "[ALERT] STRUCTURING | User: $user | ${user_count[$user]} transactions entre ${low} et ${threshold} MAD (zone de smurfing)"
+            local alert_msg="STRUCTURING | User: $user | ${user_count[$user]} transactions entre ${low} et ${threshold} MAD (zone de smurfing)"
+            _detector_warn "ALERTE FRAUDE: $alert_msg"
             found=1
+        elif [ "${user_count[$user]}" -eq 1 ]; then
+            _detector_warn "$user: 1 transaction dans zone smurfing - surveillance renforcée"
         fi
     done
 
-    return $((1 - found))
+    if [ $found -eq 1 ]; then
+        _detector_warn "STRUCTURING: Détection(s) trouvée(s)"
+        return 0
+    else
+        _detector_info "STRUCTURING: Aucune détection"
+        return 1
+    fi
 }
 
-# Détecte les changements fréquents de compte sur une courte période
-# $1 : contenu CSV (texte)
-# ─────────────────────────────────────────────
 # ALGO 5 — ACCOUNT_SWITCHING
 # Détecte les changements fréquents de compte destinataire (> 3 comptes différents)
-# $1 : contenu CSV complet (texte, sans header)
-# ─────────────────────────────────────────────
 detect_account_switching() {
-    : # TODO: implémenter
     local csv_data="$1"
     local found=0
+
+    _detector_info "Début détection ACCOUNT_SWITCHING"
 
     # Récupérer la liste des utilisateurs uniques
     local users
@@ -233,44 +290,43 @@ detect_account_switching() {
         ' | sort -u)
 
         local count
-        count=$(echo "$dest_accounts" | grep -c '.')
+        count=$(echo "$dest_accounts" | grep -c '.' 2>/dev/null || echo "0")
 
         if [ "$count" -gt 3 ]; then
             local accounts_list
+            local accounts_list
             accounts_list=$(echo "$dest_accounts" | tr '\n' ',' | sed 's/,$//')
-            echo "[ALERT] ACCOUNT_SWITCHING | User: $user | $count comptes destinataires différents: $accounts_list"
+            local alert_msg="ACCOUNT_SWITCHING | User: $user | $count comptes destinataires différents: $accounts_list"
+            _detector_warn "ALERTE FRAUDE: $alert_msg"
             found=1
+        elif [ "$count" -eq 2 ] || [ "$count" -eq 3 ]; then
+            _detector_info "$user: Changement de compte modéré ($count comptes différents)"
         fi
     done
 
-    return $((1 - found))
+    if [ $found -eq 1 ]; then
+        _detector_warn "ACCOUNT_SWITCHING: Détection(s) trouvée(s)"
+        return 0
+    else
+        _detector_info "ACCOUNT_SWITCHING: Aucune détection"
+        return 1
+    fi
 }
 
-# Point d'entrée principal de détection pour une transaction
-# ─────────────────────────────────────────────
 # Point d'entrée principal
 # Appelé transaction par transaction depuis executor.sh
-# $1 : transaction_id
-# $2 : amount
-# ─────────────────────────────────────────────
 analyze_transaction() {
-    local transaction_id="$1" amount="$2"
-    if detect_high_amount "$amount"; then
-        log_warn "Fraude potentielle détectée — ID: $transaction_id, Montant: $amount"
     local transaction_id="$1"
     local amount="$2"
     local threshold="${THRESHOLD:-8000}"
 
+    _detector_info "Analyse transaction $transaction_id (montant: $amount MAD)"
+
     if [ "$(echo "$amount > $threshold" | bc 2>/dev/null)" = "1" ]; then
-        # log_warn doit être défini dans logger.sh (sourcé avant)
-        if declare -f log_warn > /dev/null 2>&1; then
-            log_warn "Fraude potentielle détectée — ID: $transaction_id, Montant: $amount"
-        else
-            echo "[WARN] Fraude potentielle détectée — ID: $transaction_id, Montant: $amount"
-        fi
+        _detector_warn "Fraude potentielle détectée — ID: $transaction_id, Montant: $amount MAD (dépasse seuil ${threshold})"
         return 1
     fi
+    
+    _detector_info "Transaction $transaction_id validée"
     return 0
 }
-
-

@@ -4,13 +4,17 @@
 # Auteur  : Djelika
 # Date    : 2026-05-03
 # Version : 1.1
-# Usage   : ./parser.sh <fichier.csv> [utilisateur]
-# Exemple : ./parser.sh data.csv Alice
+# Usage   : Sourcé par fraud_detector.sh
 # ============================================
 
+<<<<<<< HEAD
 # Charge le fichier logger.sh qui contient log_error(), log_info() et FILE_LOG
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/logger.sh"
+=======
+# Note: SCRIPT_DIR est déjà défini par fraud_detector.sh
+# Ne pas le redéfinir ici pour éviter les conflits de chemins
+>>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
 
 
 # ============================================
@@ -142,15 +146,19 @@ parse_line() {
 # But      : Filtre les transactions selon un utilisateur donné
 # Arguments:
 #   $1 = chemin du fichier CSV
-#   $2 = nom d'utilisateur (vide = afficher tout)
-# Retour   : 0 si succès
+#   $2 = nom d'utilisateur (vide = retourner tout)
+# Retour   : Données CSV sur stdout (sans header)
 # ============================================
 filter_by_user() {
     local file="$1"
     local user_filter="$2"
 
-    # Si aucun utilisateur donné, afficher tout le fichier
+    # Debug
+    [[ -n "$DEBUG" ]] && log_info "[DEBUG] filter_by_user: file=$file, user=$user_filter"
+
+    # Si aucun utilisateur donné, retourner tout sauf header
     if [[ -z "$user_filter" ]]; then
+<<<<<<< HEAD
         while IFS= read -r line; do
             log_info "$line"
         done < "$file"
@@ -165,6 +173,15 @@ filter_by_user() {
         log_info "$line"
     done < <(awk -F'|' -v user="$user_filter" 'NR>1 && $3==user' "$file")
 
+=======
+        tail -n +2 "$file"
+        return 0
+    fi
+
+    # Filtrer selon la colonne USER (colonne 3) en ignorant l'en-tête
+    awk -F'|' -v user="$user_filter" 'NR>1 && $3==user' "$file"
+    
+>>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
     return 0
 }
 
@@ -177,6 +194,13 @@ filter_by_user() {
 show_stats() {
     local file="$1"
 
+<<<<<<< HEAD
+=======
+    [[ -n "$DEBUG" ]] && log_info "[DEBUG] show_stats: file=$file"
+
+    echo -e "\n${BOLD}${BLUE}═══════════════ STATISTIQUES ═══════════════${RESET}"
+    
+>>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
     awk -F'|' '
     NR > 1 {
         amount = $6 + 0
@@ -187,6 +211,7 @@ show_stats() {
     }
     END {
         if (count > 0) {
+<<<<<<< HEAD
             print "Le minimum des montants : " min
             print "Le maximum des montants : " max
             print "Moyenne des montants : " sum / count
@@ -196,4 +221,16 @@ show_stats() {
     }' "$file" | while IFS= read -r line; do
         log_info "$line"
     done
+=======
+            printf "  Transactions : %d\n", count
+            printf "  Minimum      : %.2f MAD\n", min
+            printf "  Maximum      : %.2f MAD\n", max
+            printf "  Moyenne      : %.2f MAD\n", sum / count
+        } else {
+            print "  Aucune transaction trouvée"
+        }
+    }' "$file"
+    
+    echo -e "${BLUE}═════════════════════════════════════════════${RESET}\n"
+>>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
 }
