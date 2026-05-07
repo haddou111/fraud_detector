@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# Chargement des codes d'erreur si disponibles
+if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/error_codes.sh" ]]; then
+    source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/error_codes.sh"
+fi
+
 # ============================================
 # Script  : parser.sh
 # Auteur  : Djelika
@@ -29,19 +35,19 @@ validate_csv() {
     # Vérifie si le fichier existe
     if ! [[ -f "$file_CSV" ]]; then
         log_error "Fichier CSV introuvable: $file_CSV"
-        return 1
+        exit "$E_FILE_NOT_FOUND"
     fi
 
     # Vérifie si le fichier est lisible
     if ! [[ -r "$file_CSV" ]]; then
         log_error "Impossible de lire le fichier CSV: $file_CSV"
-        return 1
+        exit "$E_PERMISSION_DENIED"
     fi
 
     # Vérifie si le fichier n'est pas vide
     if ! [[ -s "$file_CSV" ]]; then
         log_error "Le fichier CSV est vide: $file_CSV"
-        return 1
+        exit "$E_INVALID_CSV"
     fi
 
     return 0
@@ -62,7 +68,7 @@ validate_header() {
 
     if [[ "$header" != "$expected" ]]; then
         log_error "En-tête CSV invalide: $header"
-        return 1
+        exit "$E_INVALID_CSV"
     fi
 
     return 0
@@ -135,7 +141,7 @@ parse_line() {
     IFS='|' read -r ID TIMESTAMP USER SOURCE_ACCOUNT DEST_ACCOUNT AMOUNT <<< "$line"
 
     if ! validate_columns "$ID" "$TIMESTAMP" "$USER" "$SOURCE_ACCOUNT" "$DEST_ACCOUNT" "$AMOUNT"; then
-        return 1
+        exit "$E_INVALID_CSV"
     fi
 
     return 0

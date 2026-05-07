@@ -21,15 +21,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"    
 
 # ── Chargement des bibliothèques ─────────────────────────────
+source "${SCRIPT_DIR}/lib/error_codes.sh" || { echo "ERREUR: lib/error_codes.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/logger.sh"   || { echo "ERREUR: lib/logger.sh manquant"; exit 1; }  
 source "${SCRIPT_DIR}/lib/utils.sh"    || { echo "ERREUR: lib/utils.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/parser.sh"   || { echo "ERREUR: lib/parser.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/detector.sh" || { echo "ERREUR: lib/detector.sh manquant"; exit 1; }
 source "${SCRIPT_DIR}/lib/executor.sh" || { echo "ERREUR: lib/executor.sh manquant"; exit 1; }
-# ── Codes d'erreur ───────────────────────────────────────────
-E_MISSING_PARAM=1
-E_INVALID_OPTION=2
-E_INVALID_CSV=3
 
 # ── Valeurs par défaut ───────────────────────────────────────
 MODE=""
