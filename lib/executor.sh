@@ -58,7 +58,6 @@ run_subshell() {
             ((total_alerts++))
         fi
     done < "$result_file"
-    
     rm -f "$result_file"
     log_info "[SUBSHELL] Terminé - $total_alerts algorithme(s) ont détecté des fraudes"
     
@@ -93,7 +92,7 @@ run_fork() {
     
     "$fork_bin" "${SCRIPT_DIR}/fraud_detector.sh" "$csv_file" "$threshold" "$LOG_FILE"
     
-    local ret=$?
+    local ret=$?   
     if [ $ret -eq 0 ]; then
         log_info "[FORK] fork_runner terminé avec succès"
     else
