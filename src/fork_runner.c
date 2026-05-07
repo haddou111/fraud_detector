@@ -162,12 +162,22 @@ int main(int argc, char *argv[])
     printf(GREEN "[FORK] Fils 5 (PID=%d) terminé — code: %d\n" RESET,
            fils5, WEXITSTATUS(status5));
 
+    /* Compter le nombre d'alertes (code 0 = fraude détectée) */
+    int total_alerts = 0;
+    if (WEXITSTATUS(status1) == 0) total_alerts++;
+    if (WEXITSTATUS(status2) == 0) total_alerts++;
+    if (WEXITSTATUS(status3) == 0) total_alerts++;
+    if (WEXITSTATUS(status4) == 0) total_alerts++;
+    if (WEXITSTATUS(status5) == 0) total_alerts++;
+
     /* Calcul de la durée totale */
     clock_t end = clock();
     double duration = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf(CYAN "\n[PERF] Mode: fork | Durée: %.3fs | PID parent: %d | PIDs fils: %d, %d, %d, %d, %d\n" RESET,
            duration, getpid(), fils1, fils2, fils3, fils4, fils5);
+    
+    printf(CYAN "[FORK] Total alertes détectées: %d\n" RESET, total_alerts);
 
-    return EXIT_SUCCESS;
+    return total_alerts;
 }

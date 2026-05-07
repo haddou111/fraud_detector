@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Répertoire par défaut des logs système (à utiliser uniquement si le script est exécuté avec les droits root)
-DEFAULT_LOG_DIR="/var/log/fraud_detector"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Répertoire des logs
 LOG_DIR="${SCRIPT_DIR:-$(pwd)}/logs"
