@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Chargement des codes d'erreur si disponibles
+if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/error_codes.sh" ]]; then
+    source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/error_codes.sh"
+fi
+
 # ── Couleurs ANSI (définies aussi dans logger.sh, mais nécessaires ici) ──
 RED="\033[0;31m"
 GREEN="\033[0;32m"
@@ -11,7 +16,7 @@ RESET="\033[0m"
 require_cmd() {
     command -v "$1" &>/dev/null || { 
         log_error "Commande requise introuvable: $1"
-        exit 1 
+        exit "$E_FILE_NOT_FOUND"
     }
 }
 
@@ -19,7 +24,7 @@ require_cmd() {
 require_file() {
     [[ -r "$1" ]] || { 
         log_error "Fichier introuvable ou illisible: $1"
-        exit 1 
+        exit "$E_PERMISSION_DENIED"
     }
 }
 
@@ -43,7 +48,7 @@ check_root() {
     if [ "$EUID" -ne 0 ]; then
         log_error "Cette opération nécessite les droits root (administrateur)"
         echo -e "${BLUE}[INFO]${RESET} Relancez avec : sudo $0 $*" >&2
-        exit 1
+        exit "$E_INSUFFICIENT_PRIVILEGE"
     fi
 }
 

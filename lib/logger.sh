@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Chargement des codes d'erreur si disponibles
+if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/error_codes.sh" ]]; then
+    source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")}/error_codes.sh"
+fi
+
 # Répertoire par défaut des logs système (à utiliser uniquement si le script est exécuté avec les droits root)
 DEFAULT_LOG_DIR="/var/log/fraud_detector"
 # Répertoire des logs
@@ -27,26 +32,26 @@ init_logger() {
     # Vérification des droits root si dossier système utilisé
     if [ "$LOG_DIR" = "$DEFAULT_LOG_DIR" ] && [ "$EUID" -ne 0 ]; then
         echo -e "${RED}[ERROR] Accès root requis pour écrire dans $LOG_DIR${RESET}"
-        exit 105
+        exit "$E_INSUFFICIENT_PRIVILEGE"
     fi
     # Création du dossier de logs si inexistant
     if [ ! -d "$LOG_DIR" ]; then
         mkdir -p "$LOG_DIR" 2>/dev/null || {
             echo -e "${RED}[ERROR] Impossible de créer le dossier de logs: $LOG_DIR${RESET}"
-            exit 106
+            exit "$E_INVALID_LOG_DIR"
         }
     fi
     # Création du fichier log si inexistant
     if [ ! -f "$LOG_FILE" ]; then
         touch "$LOG_FILE" 2>/dev/null || {
             echo -e "${RED}[ERROR] Impossible de créer le fichier log: $LOG_FILE${RESET}"
-            exit 106
+            exit "$E_INVALID_LOG_DIR"
         }
     fi
     # Permissions sécurisées du fichier log
     chmod u=rw,go=r "$LOG_FILE" 2>/dev/null || {
     log_error "Impossible de modifier permissions"
-    exit 106
+    exit "$E_INVALID_LOG_DIR"
     }
     # Gestion interruption CTRL+C
     trap 'log_error "Interruption du programme (SIGINT)"; exit 130' INT
@@ -57,7 +62,7 @@ restore_logs() {
     # Vérification des permissions (root)
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}[ERROR] Option -r nécessite les droits administrateur${RESET}"
-        exit 105
+        exit "$E_INSUFFICIENT_PRIVILEGE"
     fi
     # Si log existe
     if [ -f "$LOG_FILE" ]; then
@@ -66,12 +71,12 @@ restore_logs() {
         #archive le fichier de log actuel dans un fichier tar.gz et redirige les erreurs vers le fichier de log
         tar -czf "$archive" "$LOG_FILE" 2>/dev/null || {
              log_error "Echec archivage logs"
-             exit 106
+             exit "$E_INVALID_LOG_DIR"
       }
         #Réinitialisation du log
         :> "$LOG_FILE" 2>>"$LOG_FILE" || {
             log_error "Échec de la réinitialisation du log"
-            exit 106
+            exit "$E_INVALID_LOG_DIR"
         }
 
         echo -e "${GREEN}[INFO] Logs archivés dans $archive${RESET}"
