@@ -6,3 +6,5 @@ src/thread_runner
 # Ignorer le dossier temporaire
 tmp/
 logs/*.log
+#c code 
+subshell_runner.c
