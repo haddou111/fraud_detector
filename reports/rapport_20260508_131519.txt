@@ -1,3 +1,13 @@
+==================================================
+  RAPPORT FraudDetect — 2026-05-08 13:15:19
+==================================================
+Fichier  : data/transactions_light.csv
+Mode     : subshell
+Seuil    : 8000 MAD
+Lignes   : 50
+Alertes  : 1
+
+--- JOURNAL ---
 [0;34m2026-05-07-16-36-25 : razer_haddou : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv[0m
 [0;34m2026-05-07-16-36-25 : razer_haddou : INFOS : [INIT] Chargement du fichier CSV...[0m
 [0;34m2026-05-07-16-36-25 : razer_haddou : INFOS : [INIT] 50 transactions chargées[0m
@@ -2900,32 +2910,3 @@
 2026-05-08-13-15-19 : pc : INFOS : [GCC] |                                               ^~~~~~~~~~~~~~
 2026-05-08-13-15-19 : pc : INFOS : [GCC] /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/src/subshell_runner.c:131:47: note: each undeclared identifier is reported only once for each function it appears in
 2026-05-08-13-15-19 : pc : ERROR : [SUBSHELL] Échec compilation subshell_runner
-2026-05-08-13-15-19 : pc : INFOS : Rapport généré : /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/reports/rapport_20260508_131519.txt
-2026-05-08-13-15-19 : pc : INFOS : Terminé — 50 transactions — 1 alertes
-2026-05-08-13-23-26 : pc : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv
-2026-05-08-13-23-27 : pc : INFOS : [INIT] Chargement du fichier CSV...
-2026-05-08-13-23-27 : pc : INFOS : [INIT] 3 transactions chargées
-2026-05-08-13-23-27 : pc : INFOS : [INIT] Démarrage fraud_detector.sh — mode: fork — fichier: data/transactions_light.csv
-2026-05-08-13-23-27 : pc : INFOS : [SINGLE] Exécution de l'algorithme: behavior
-2026-05-08-13-23-27 : pc : INFOS : [DETECTOR] Début détection BEHAVIOR_CHANGE (ratio seuil: 10x)
-2026-05-08-13-23-27 : pc : INFOS : [DETECTOR] BEHAVIOR_CHANGE: Aucune détection
-2026-05-08-13-23-27 : pc : INFOS : [SINGLE] Algorithme behavior terminé avec 0 alerte(s)
-2026-05-08-13-23-27 : pc : INFOS : Terminé — 3 transactions — 0 alertes
-2026-05-08-13-34-56 : pc : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv
-2026-05-08-13-34-56 : pc : INFOS : [INIT] Chargement du fichier CSV...
-2026-05-08-13-34-56 : pc : INFOS : [INIT] 50 transactions chargées
-2026-05-08-13-34-56 : pc : INFOS : [INIT] Démarrage fraud_detector.sh — mode: fork — fichier: data/transactions_light.csv
-2026-05-08-13-34-56 : pc : INFOS : [SINGLE] Exécution de l'algorithme: behavior
-2026-05-08-13-34-56 : pc : INFOS : [DETECTOR] Début détection BEHAVIOR_CHANGE (ratio seuil: 10x)
-2026-05-08-13-35-09 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: BEHAVIOR_CHANGE | User: Dina | Montant habituel ~217 MAD → Montant actuel: 6672 MAD (ratio x30)
-2026-05-08-13-35-40 : pc : ERROR : Interruption du programme (SIGINT)
-2026-05-08-13-36-04 : pc : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv
-2026-05-08-13-36-04 : pc : INFOS : [INIT] Chargement du fichier CSV...
-2026-05-08-13-36-04 : pc : INFOS : [INIT] 2 transactions chargées
-2026-05-08-13-36-04 : pc : INFOS : [INIT] Démarrage fraud_detector.sh — mode: fork — fichier: data/transactions_light.csv
-2026-05-08-13-36-04 : pc : INFOS : [SINGLE] Exécution de l'algorithme: behavior
-2026-05-08-13-36-04 : pc : INFOS : [DETECTOR] Début détection BEHAVIOR_CHANGE (ratio seuil: 10x)
-2026-05-08-13-36-04 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: BEHAVIOR_CHANGE | User: Dina | Montant habituel ~217 MAD → Montant actuel: 6672 MAD (ratio x30)
-2026-05-08-13-36-04 : pc : WARNING : [DETECTOR] BEHAVIOR_CHANGE: Détection(s) trouvée(s)
-2026-05-08-13-36-04 : pc : INFOS : [SINGLE] Algorithme behavior terminé avec 1 alerte(s)
-2026-05-08-13-36-05 : pc : INFOS : Terminé — 2 transactions — 1 alertes
