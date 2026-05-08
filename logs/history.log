@@ -2929,3 +2929,96 @@
 2026-05-08-13-36-04 : pc : WARNING : [DETECTOR] BEHAVIOR_CHANGE: Détection(s) trouvée(s)
 2026-05-08-13-36-04 : pc : INFOS : [SINGLE] Algorithme behavior terminé avec 1 alerte(s)
 2026-05-08-13-36-05 : pc : INFOS : Terminé — 2 transactions — 1 alertes
+2026-05-08-13-42-30 : pc : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv
+2026-05-08-13-42-30 : pc : INFOS : [INIT] Chargement du fichier CSV...
+2026-05-08-13-42-30 : pc : INFOS : [INIT] 2 transactions chargées
+2026-05-08-13-42-30 : pc : INFOS : [INIT] Démarrage fraud_detector.sh — mode: fork — fichier: data/transactions_light.csv
+2026-05-08-13-42-30 : pc : INFOS : [SINGLE] Exécution de l'algorithme: behavior
+2026-05-08-13-42-30 : pc : INFOS : [DETECTOR] Début détection BEHAVIOR_CHANGE (ratio seuil: 10x)
+2026-05-08-13-42-30 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: BEHAVIOR_CHANGE | User: Dina | Montant habituel ~217 MAD → Montant actuel: 6672 MAD (ratio x30)
+2026-05-08-13-42-30 : pc : WARNING : [DETECTOR] BEHAVIOR_CHANGE: Détection(s) trouvée(s)
+2026-05-08-13-42-30 : pc : INFOS : [SINGLE] Algorithme behavior terminé avec 1 alerte(s)
+2026-05-08-13-42-30 : pc : INFOS : Terminé — 2 transactions — 1 alertes
+2026-05-08-13-50-50 : pc : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv
+2026-05-08-13-50-50 : pc : INFOS : [INIT] Chargement du fichier CSV...
+2026-05-08-13-50-50 : pc : INFOS : [INIT] 50 transactions chargées
+2026-05-08-13-50-50 : pc : INFOS : [INIT] Démarrage fraud_detector.sh — mode: subshell — fichier: data/transactions_light.csv
+2026-05-08-13-50-50 : pc : INFOS : [SUBSHELL] Compilation de subshell_runner.c...
+2026-05-08-13-50-50 : pc : INFOS : [GCC] /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/src/subshell_runner.c: In function ‘main’:
+2026-05-08-13-50-50 : pc : INFOS : [GCC] /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/src/subshell_runner.c:95:21: warning: implicit declaration of function ‘clock’ [-Wimplicit-function-declaration]
+2026-05-08-13-50-50 : pc : INFOS : [GCC] 95 |     clock_t start = clock();
+2026-05-08-13-50-50 : pc : INFOS : [GCC] |                     ^~~~~
+2026-05-08-13-50-50 : pc : INFOS : [GCC] /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/src/subshell_runner.c:19:1: note: ‘clock’ is defined in header ‘<time.h>’; did you forget to ‘#include <time.h>’?
+2026-05-08-13-50-50 : pc : INFOS : [GCC] 18 | #include <sys/time.h>    /* Pour une mesure précise du temps réel */
+2026-05-08-13-50-50 : pc : INFOS : [GCC] +++ |+#include <time.h>
+2026-05-08-13-50-50 : pc : INFOS : [GCC] 19 |
+2026-05-08-13-50-50 : pc : INFOS : [GCC] /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/src/subshell_runner.c:131:47: error: ‘CLOCKS_PER_SEC’ undeclared (first use in this function)
+2026-05-08-13-50-50 : pc : INFOS : [GCC] 131 |     double duration = (double)(end - start) / CLOCKS_PER_SEC;
+2026-05-08-13-50-50 : pc : INFOS : [GCC] |                                               ^~~~~~~~~~~~~~
+2026-05-08-13-50-50 : pc : INFOS : [GCC] /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/src/subshell_runner.c:131:47: note: each undeclared identifier is reported only once for each function it appears in
+2026-05-08-13-50-50 : pc : ERROR : [SUBSHELL] Échec compilation subshell_runner
+2026-05-08-13-50-50 : pc : INFOS : Terminé — 50 transactions — 1 alertes
+2026-05-08-13-50-59 : pc : INFOS : [INIT] Validation du fichier CSV: data/transactions_light.csv
+2026-05-08-13-50-59 : pc : INFOS : [INIT] Chargement du fichier CSV...
+2026-05-08-13-50-59 : pc : INFOS : [INIT] 50 transactions chargées
+2026-05-08-13-50-59 : pc : INFOS : [INIT] Démarrage fraud_detector.sh — mode: threads — fichier: data/transactions_light.csv
+2026-05-08-13-51-00 : pc : INFOS : [THREADS] Lancement thread_runner (mode parallèle avec pthreads)
+2026-05-08-13-51-00 : pc : INFOS : [THREADS] Commande: /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/thread_runner /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/fraud_detector.sh data/transactions_light.csv 8000 /mnt/c/Users/pc/OneDrive/Numerisations/fraud_detector/fraud_detector/logs/history.log
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] Démarrage algo: frequency
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] Démarrage algo: switching
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] Démarrage algo: high
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] Démarrage algo: structuring
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] Démarrage algo: behavior
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] 50 lignes chargées
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] 50 lignes chargées
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] 50 lignes chargées
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] 50 lignes chargées
+2026-05-08-13-51-00 : pc : INFOS : [MODE INTERNE] 50 lignes chargées
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Début détection ACCOUNT_SWITCHING
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Début détection HIGH_AMOUNT (seuil: 8000 MAD)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Début détection FREQUENCY_ANOMALY (fenêtre: 5 minutes)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Début détection BEHAVIOR_CHANGE (ratio seuil: 10x)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Début détection STRUCTURING (zone: 7200-8000 MAD)
+2026-05-08-13-51-00 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Fouad | Amount: 8769 MAD | ACC20 → ACC15
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Ali: Changement de compte modéré (3 comptes différents)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Claire: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Dina: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Jamal: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-00 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Barbara | Amount: 9774 MAD | ACC18 → ACC3
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Leila: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Lucia: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-00 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Lucia | Amount: 8789 MAD | ACC6 → ACC19
+2026-05-08-13-51-00 : pc : INFOS : [DETECTOR] Nadia: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Vera: Transaction suspecte de 7497 MAD (zone de smurfing)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Nour: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Patricia: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Richard: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Selma: Transaction suspecte de 7223 MAD (zone de smurfing)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Sana: Changement de compte modéré (2 comptes différents)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Ahmed: Transaction suspecte de 7528 MAD (zone de smurfing)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] ACCOUNT_SWITCHING: Aucune détection
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Leila: Transaction suspecte de 7986 MAD (zone de smurfing)
+2026-05-08-13-51-01 : pc : INFOS : [MODE INTERNE] Terminé avec 0 alerte(s)
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] Chen: Transaction suspecte de 7887 MAD (zone de smurfing)
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] Vera: 1 transaction dans zone smurfing - surveillance renforcée
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] Chen: 1 transaction dans zone smurfing - surveillance renforcée
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Nour | Amount: 9116 MAD | ACC3 → ACC16
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] Leila: 1 transaction dans zone smurfing - surveillance renforcée
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] Selma: 1 transaction dans zone smurfing - surveillance renforcée
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] Ahmed: 1 transaction dans zone smurfing - surveillance renforcée
+2026-05-08-13-51-01 : pc : INFOS : [DETECTOR] STRUCTURING: Aucune détection
+2026-05-08-13-51-01 : pc : INFOS : [MODE INTERNE] Terminé avec 0 alerte(s)
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Ali | Amount: 9028 MAD | ACC18 → ACC7
+2026-05-08-13-51-01 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Patricia | Amount: 9559 MAD | ACC20 → ACC12
+2026-05-08-13-51-02 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Richard | Amount: 8851 MAD | ACC3 → ACC7
+2026-05-08-13-51-02 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Sana | Amount: 9455 MAD | ACC18 → ACC5
+2026-05-08-13-51-02 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Hana | Amount: 9871 MAD | ACC6 → ACC15
+2026-05-08-13-51-03 : pc : WARNING : [DETECTOR] HIGH_AMOUNT: Détection(s) trouvée(s)
+2026-05-08-13-51-03 : pc : INFOS : [MODE INTERNE] Terminé avec 1 alerte(s)
+2026-05-08-13-51-07 : pc : WARNING : [DETECTOR] ALERTE FRAUDE: BEHAVIOR_CHANGE | User: Dina | Montant habituel ~217 MAD → Montant actuel: 6672 MAD (ratio x30)
+2026-05-08-13-51-14 : pc : INFOS : [DETECTOR] FREQUENCY_ANOMALY: Aucune détection
+2026-05-08-13-51-14 : pc : INFOS : [MODE INTERNE] Terminé avec 0 alerte(s)
+2026-05-08-13-51-31 : pc : WARNING : [DETECTOR] BEHAVIOR_CHANGE: Détection(s) trouvée(s)
+2026-05-08-13-51-31 : pc : INFOS : [MODE INTERNE] Terminé avec 1 alerte(s)
+2026-05-08-13-51-31 : pc : ERROR : [THREADS] thread_runner échec (code: 3)
+2026-05-08-13-51-31 : pc : INFOS : Terminé — 50 transactions — 3 alertes

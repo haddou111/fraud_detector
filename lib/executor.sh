@@ -1,50 +1,68 @@
 #!/bin/bash
-DATA_DIR="${SCRIPT_DIR:-$(pwd)}/data"
 
-declare -A SCENARIO_FILES=(
-    [léger]="$DATA_DIR/transactions_light.csv"
-    [moyen]="$DATA_DIR/transactions_medium.csv"
-    [lourd]="$DATA_DIR/transactions_heavy.csv"
-)
-
-# Lance les 5 algorithmes en parallèle via le runner C (subshells)
+# Lance les 5 algorithmes en parallèle via sous-shells bash
 # $1 : contenu CSV  $2 : chemin du fichier CSV
 run_subshell() {
+    local csv_content="$1"
     local csv_file="$2"
-    local threshold="${THRESHOLD:-8000}"
     
-    local sub_bin="${SCRIPT_DIR}/subshell_runner"
-    local sub_src="${SCRIPT_DIR}/src/subshell_runner.c"
+    log_info "[SUBSHELL] Lancement de 5 sous-shells en parallèle"
     
-    # Vérifier si subshell_runner existe, sinon le compiler
-    if [ ! -f "$sub_bin" ]; then
-        log_info "[SUBSHELL] Compilation de subshell_runner.c..."
-        gcc -o "$sub_bin" "$sub_src" 2>&1 | while read line; do log_info "[GCC] $line"; done
-        
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            log_error "[SUBSHELL] Échec compilation subshell_runner"
-            return 1
+    # Créer un fichier temporaire pour les résultats
+    local tmp_dir="${SCRIPT_DIR}/tmp"
+    mkdir -p "$tmp_dir"
+    local result_file="$tmp_dir/subshell_results_$$.txt"
+    > "$result_file"
+    
+    # Lancer les 5 algos en arrière-plan
+    (
+        log_info "[SUBSHELL-1] HIGH_AMOUNT démarré"
+        detect_high_amount "$csv_content"
+        echo "high:$?" >> "$result_file"
+    ) &
+    
+    (
+        log_info "[SUBSHELL-2] FREQUENCY_ANOMALY démarré"
+        detect_frequency_anomaly "$csv_content"
+        echo "frequency:$?" >> "$result_file"
+    ) &
+    
+    (
+        log_info "[SUBSHELL-3] BEHAVIOR_CHANGE démarré"
+        detect_behavior_change "$csv_content"
+        echo "behavior:$?" >> "$result_file"
+    ) &
+    
+    (
+        log_info "[SUBSHELL-4] STRUCTURING démarré"
+        detect_structuring "$csv_content"
+        echo "structuring:$?" >> "$result_file"
+    ) &
+    
+    (
+        log_info "[SUBSHELL-5] ACCOUNT_SWITCHING démarré"
+        detect_account_switching "$csv_content"
+        echo "switching:$?" >> "$result_file"
+    ) &
+    
+    # Attendre que tous les sous-shells se terminent
+    log_info "[SUBSHELL] Attente de la fin des 5 sous-shells..."
+    wait
+    
+    # Compter le nombre total d'alertes
+    local total_alerts=0
+    while IFS=: read -r algo code; do
+        log_info "[SUBSHELL] $algo terminé avec code $code"
+        # Code 0 = fraude détectée, code 1 = pas de fraude
+        if [[ "$code" == "0" ]]; then
+            ((total_alerts++))
         fi
-        log_info "[SUBSHELL] Compilation réussie"
-    fi
+    done < "$result_file"
+    rm -f "$result_file"
+    log_info "[SUBSHELL] Terminé - $total_alerts algorithme(s) ont détecté des fraudes"
     
-    # Exécuter subshell_runner avec les paramètres requis
-    log_info "[SUBSHELL] Lancement subshell_runner (mode parallèle avec subshells)"
-    
-    "$sub_bin" "${SCRIPT_DIR}/fraud_detector.sh" "$csv_file" "$threshold" "$LOG_FILE"
-    
-    # Le binaire retourne le nombre total d'alertes via son code de sortie ($?)
-    local ret=$?
-    
-    if [ $ret -ge 100 ]; then
-        log_error "[SUBSHELL] Échec critique du runner (code: $ret)"
-        return 1
-    fi
-
-    log_info "[SUBSHELL] Terminé - $ret algorithme(s) ont détecté des fraudes"
-    return "$ret"
+    return "$total_alerts"
 }
-
 
 # Lance les 5 algorithmes via fork_runner.c (appels système fork/wait)
 # $1 : contenu CSV  $2 : chemin du fichier CSV
@@ -74,7 +92,7 @@ run_fork() {
     
     "$fork_bin" "${SCRIPT_DIR}/fraud_detector.sh" "$csv_file" "$threshold" "$LOG_FILE"
     
-    local ret=$?
+    local ret=$?   
     if [ $ret -eq 0 ]; then
         log_info "[FORK] fork_runner terminé avec succès"
     else
@@ -122,23 +140,3 @@ run_threads() {
     return $ret
 }
 
-# Sélectionne le fichier selon le mode
-resolve_input() {
-    local mode="$1"
-    echo "${SCENARIO_FILES[$mode]:-}"
-}
-
-# Exécute la détection sur un fichier CSV
-run() {
-    local input="$1"
-    require_file "$input"
-    validate_header "$input"
-    local count=0 frauds=0
-    while IFS= read -r line; do
-        [[ $count -eq 0 ]] && (( count++ )) && continue  # skip header
-        parse_line "$line"
-        analyze_transaction "$TRANSACTION_ID" "$AMOUNT" || (( frauds++ ))
-        (( count++ ))
-    done < "$input"
-    log_info "Traitement terminé — $((count-1)) transactions, $frauds fraude(s) détectée(s)"
-}
