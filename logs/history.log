@@ -126,3 +126,5 @@
 [0;34m2026-05-07-16-48-31 : razer_haddou : INFOS : [MODE INTERNE] Terminé avec 1 alerte(s)[0m
 [0;31m2026-05-07-16-48-31 : razer_haddou : ERROR : [FORK] fork_runner échec (code: 3)[0m
 [0;34m2026-05-07-16-48-31 : razer_haddou : INFOS : Terminé — 50 transactions — 3 alertes[0m
+[0;34m2026-05-08-10-25-49 : hp : INFOS : [INIT] Validation du fichier CSV: transactions_light.csv[0m
+[0;31m2026-05-08-10-25-49 : hp : ERROR : Fichier CSV introuvable: transactions_light.csv[0m

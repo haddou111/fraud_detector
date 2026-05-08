@@ -13,14 +13,8 @@ fi
 # Usage   : Sourcé par fraud_detector.sh
 # ============================================
 
-<<<<<<< HEAD
-# Charge le fichier logger.sh qui contient log_error(), log_info() et FILE_LOG
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/logger.sh"
-=======
 # Note: SCRIPT_DIR est déjà défini par fraud_detector.sh
 # Ne pas le redéfinir ici pour éviter les conflits de chemins
->>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
 
 
 # ============================================
@@ -164,22 +158,6 @@ filter_by_user() {
 
     # Si aucun utilisateur donné, retourner tout sauf header
     if [[ -z "$user_filter" ]]; then
-<<<<<<< HEAD
-        while IFS= read -r line; do
-            log_info "$line"
-        done < "$file"
-        return 0
-    fi
-
-    # Afficher l'en-tête
-    log_info "$(head -n 1 "$file")"
-
-    # Filtrer selon la colonne USER (colonne 3) en ignorant l'en-tête
-    while IFS= read -r line; do
-        log_info "$line"
-    done < <(awk -F'|' -v user="$user_filter" 'NR>1 && $3==user' "$file")
-
-=======
         tail -n +2 "$file"
         return 0
     fi
@@ -187,7 +165,6 @@ filter_by_user() {
     # Filtrer selon la colonne USER (colonne 3) en ignorant l'en-tête
     awk -F'|' -v user="$user_filter" 'NR>1 && $3==user' "$file"
     
->>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
     return 0
 }
 
@@ -200,13 +177,10 @@ filter_by_user() {
 show_stats() {
     local file="$1"
 
-<<<<<<< HEAD
-=======
     [[ -n "$DEBUG" ]] && log_info "[DEBUG] show_stats: file=$file"
 
     echo -e "\n${BOLD}${BLUE}═══════════════ STATISTIQUES ═══════════════${RESET}"
     
->>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
     awk -F'|' '
     NR > 1 {
         amount = $6 + 0
@@ -217,17 +191,6 @@ show_stats() {
     }
     END {
         if (count > 0) {
-<<<<<<< HEAD
-            print "Le minimum des montants : " min
-            print "Le maximum des montants : " max
-            print "Moyenne des montants : " sum / count
-        } else {
-            print "Aucune transaction trouvée"
-        }
-    }' "$file" | while IFS= read -r line; do
-        log_info "$line"
-    done
-=======
             printf "  Transactions : %d\n", count
             printf "  Minimum      : %.2f MAD\n", min
             printf "  Maximum      : %.2f MAD\n", max
@@ -238,5 +201,4 @@ show_stats() {
     }' "$file"
     
     echo -e "${BLUE}═════════════════════════════════════════════${RESET}\n"
->>>>>>> 9dba09f1841e58183f594750a04aff01067ef8dc
 }
