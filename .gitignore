@@ -1,0 +1,8 @@
+# Ignorer les binaires compilés
+fork_runner
+thread_runner
+src/fork_runner
+src/thread_runner
+# Ignorer le dossier temporaire
+tmp/
+logs/*.log
