@@ -18,7 +18,16 @@
 
 #Resolution de chemin de projet et ou se trouve le script principal :fraud_detector.sh
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"    
+# Résoudre le chemin réel du script même si appelé via un lien symbolique
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+# Suivre les liens symboliques pour trouver le script réel
+while [ -L "$SCRIPT_PATH" ]; do
+    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+    SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+    [[ $SCRIPT_PATH != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"    
 
 # ── Chargement des bibliothèques ─────────────────────────────
 source "${SCRIPT_DIR}/lib/error_codes.sh" || { echo "ERREUR: lib/error_codes.sh manquant"; exit 1; }

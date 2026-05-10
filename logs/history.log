@@ -126,3 +126,62 @@
 [0;34m2026-05-07-16-48-31 : razer_haddou : INFOS : [MODE INTERNE] Terminé avec 1 alerte(s)[0m
 [0;31m2026-05-07-16-48-31 : razer_haddou : ERROR : [FORK] fork_runner échec (code: 3)[0m
 [0;34m2026-05-07-16-48-31 : razer_haddou : INFOS : Terminé — 50 transactions — 3 alertes[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [INIT] Validation du fichier CSV: /home/razer_haddou/repo_banque_CIH/transactions_light.csv[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [INIT] Chargement du fichier CSV...[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [INIT] 50 transactions chargées[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [INIT] Démarrage fraud_detector.sh — mode: subshell — fichier: /home/razer_haddou/repo_banque_CIH/transactions_light.csv[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL] Lancement de 5 sous-shells en parallèle[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL-1] HIGH_AMOUNT démarré[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL-2] FREQUENCY_ANOMALY démarré[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL-3] BEHAVIOR_CHANGE démarré[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL] Attente de la fin des 5 sous-shells...[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL-4] STRUCTURING démarré[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [SUBSHELL-5] ACCOUNT_SWITCHING démarré[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Début détection HIGH_AMOUNT (seuil: 8000 MAD)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Début détection FREQUENCY_ANOMALY (fenêtre: 5 minutes)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Début détection BEHAVIOR_CHANGE (ratio seuil: 10x)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Début détection ACCOUNT_SWITCHING[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Début détection STRUCTURING (zone: 7200-8000 MAD)[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Fouad | Amount: 8769 MAD | ACC20 → ACC15[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Ali: Changement de compte modéré (3 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Claire: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Dina: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Jamal: Changement de compte modéré (2 comptes différents)[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Barbara | Amount: 9774 MAD | ACC18 → ACC3[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Leila: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Lucia: Changement de compte modéré (2 comptes différents)[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Lucia | Amount: 8789 MAD | ACC6 → ACC19[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Nadia: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Vera: Transaction suspecte de 7497 MAD (zone de smurfing)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Nour: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Patricia: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Richard: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Selma: Transaction suspecte de 7223 MAD (zone de smurfing)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Sana: Changement de compte modéré (2 comptes différents)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Ahmed: Transaction suspecte de 7528 MAD (zone de smurfing)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Leila: Transaction suspecte de 7986 MAD (zone de smurfing)[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] ACCOUNT_SWITCHING: Aucune détection[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] Chen: Transaction suspecte de 7887 MAD (zone de smurfing)[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] Vera: 1 transaction dans zone smurfing - surveillance renforcée[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] Chen: 1 transaction dans zone smurfing - surveillance renforcée[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] Leila: 1 transaction dans zone smurfing - surveillance renforcée[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] Selma: 1 transaction dans zone smurfing - surveillance renforcée[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] Ahmed: 1 transaction dans zone smurfing - surveillance renforcée[0m
+[0;35m2026-05-10-00-47-25 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Nour | Amount: 9116 MAD | ACC3 → ACC16[0m
+[0;34m2026-05-10-00-47-25 : razer_haddou : INFOS : [DETECTOR] STRUCTURING: Aucune détection[0m
+[0;35m2026-05-10-00-47-26 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Ali | Amount: 9028 MAD | ACC18 → ACC7[0m
+[0;35m2026-05-10-00-47-26 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Patricia | Amount: 9559 MAD | ACC20 → ACC12[0m
+[0;35m2026-05-10-00-47-26 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Richard | Amount: 8851 MAD | ACC3 → ACC7[0m
+[0;35m2026-05-10-00-47-26 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Sana | Amount: 9455 MAD | ACC18 → ACC5[0m
+[0;35m2026-05-10-00-47-26 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: HIGH_AMOUNT | User: Hana | Amount: 9871 MAD | ACC6 → ACC15[0m
+[0;35m2026-05-10-00-47-26 : razer_haddou : WARNING : [DETECTOR] HIGH_AMOUNT: Détection(s) trouvée(s)[0m
+[0;35m2026-05-10-00-47-27 : razer_haddou : WARNING : [DETECTOR] ALERTE FRAUDE: BEHAVIOR_CHANGE | User: Dina | Montant habituel ~217 MAD → Montant actuel: 6672 MAD (ratio x30)[0m
+[0;34m2026-05-10-00-47-30 : razer_haddou : INFOS : [DETECTOR] FREQUENCY_ANOMALY: Aucune détection[0m
+[0;35m2026-05-10-00-47-34 : razer_haddou : WARNING : [DETECTOR] BEHAVIOR_CHANGE: Détection(s) trouvée(s)[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : [SUBSHELL] switching terminé avec code 1[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : [SUBSHELL] structuring terminé avec code 1[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : [SUBSHELL] high terminé avec code 0[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : [SUBSHELL] frequency terminé avec code 1[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : [SUBSHELL] behavior terminé avec code 0[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : [SUBSHELL] Terminé - 2 algorithme(s) ont détecté des fraudes[0m
+[0;34m2026-05-10-00-47-34 : razer_haddou : INFOS : Terminé — 50 transactions — 2 alertes[0m
