@@ -311,6 +311,8 @@ cat reports/rapport_*.txt
 cat reports/alertes.txt
 ```
 
+**Note :** Pour plus de détails sur l'option --export, consultez le fichier `EXPORT_GUIDE.md`
+
 ---
 
 ## Test 7 : Fichiers de différentes tailles

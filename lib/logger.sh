@@ -109,6 +109,13 @@ _log() {
                 ;;
             WARNING)
                 echo -e "${PURPLE}${log_msg}${RESET}" | tee -a "$LOG_FILE"
+                # Si EXPORT_FILE est défini et que c'est une alerte de fraude, l'exporter
+                if [[ -n "$EXPORT_FILE" ]] && [[ "$*" == *"ALERTE FRAUDE"* ]]; then
+                    # DEBUG: Log pour vérifier que EXPORT_FILE est défini
+                    echo "[DEBUG] EXPORT_FILE=$EXPORT_FILE" >> "$LOG_FILE"
+                    echo "$*" >> "$EXPORT_FILE"
+                    echo "[DEBUG] Alerte écrite dans $EXPORT_FILE" >> "$LOG_FILE"
+                fi
                 ;;
             ERROR)
                 echo -e "${RED}${log_msg}${RESET}" | tee -a "$LOG_FILE" >&2

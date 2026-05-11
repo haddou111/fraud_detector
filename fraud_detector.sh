@@ -142,6 +142,7 @@ export LOG_DIR LOG_FILE
 if [[ -n "$INTERNAL_MODE" ]]; then
     # Le logger est déjà initialisé via --log-file
     log_info "[MODE INTERNE] Démarrage algo: $INTERNAL_MODE"
+    log_info "[MODE INTERNE] DEBUG: EXPORT_FILE=${EXPORT_FILE:-NON_DEFINI}"
     
     # Valider et charger le CSV
     validate_csv "$CSV_FILE" || {
